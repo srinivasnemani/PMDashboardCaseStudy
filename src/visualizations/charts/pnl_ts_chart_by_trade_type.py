@@ -1,3 +1,6 @@
+from typing import Optional
+
+import pandas as pd
 import plotly.graph_objects as go
 from sqlalchemy import text
 
@@ -5,7 +8,7 @@ from src.analytics.trade_summary import get_pnl_exposure_time_series
 from src.data_access.crud_util import DataAccessUtil
 
 
-def plot_pnl_series_by_trade_direction(df, date_column='trade_open_date', height=600, width=None):
+def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'trade_open_date', height: int = 600, width: Optional[int] = None) -> go.Figure:
     """
     Create a PnL chart from the output of get_exposures_series_from_trade_data function.
     Shows Long, Short, and Total PnL with toggles between daily and cumulative views.

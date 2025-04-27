@@ -2,7 +2,21 @@ import pandas as pd
 import plotly.graph_objects as go
 
 
-def plot_sector_exposure_by_total_and_net(df):
+def plot_sector_exposure_by_total_and_net(df: pd.DataFrame) -> go.Figure:
+    """
+    Create a visualization of sector exposure analysis with multiple views.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing sector exposure data with columns:
+        - gics_sector: Sector names
+        - absolute_exposure_usd: Absolute exposure in USD
+        - net_exposure_usd: Net exposure in USD
+        - absolute_exposure_pct: Absolute exposure as percentage
+        - net_exposure_pct: Net exposure as percentage
+
+    Returns:
+    go.Figure: Plotly figure showing sector exposure analysis with dropdown menu
+    """
     # Create all four figures
     fig_absolute_exposure_usd = go.Bar(x=df['gics_sector'], y=df['absolute_exposure_usd'], name='Absolute Exposure USD')
     fig_net_exposure_usd = go.Bar(x=df['gics_sector'], y=df['net_exposure_usd'], name='Net Exposure USD')
@@ -70,6 +84,7 @@ def plot_sector_exposure_by_total_and_net(df):
     )
 
     return fig
+
 
 if __name__ == "__main__":
     # To test the graph functionality before using it in dashboard.

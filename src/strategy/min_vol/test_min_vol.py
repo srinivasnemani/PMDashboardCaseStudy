@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+
 from data_access.schemas import UniverseSpec
 from src.strategy.min_vol.min_vol import (MinVolSignal, MinVolSignalData,
                                           PriceDataFetcher)

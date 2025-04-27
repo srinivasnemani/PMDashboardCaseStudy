@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.graph_objects as go
 from sqlalchemy import text
 
@@ -5,7 +6,16 @@ from src.analytics.trade_summary import get_pnl_exposure_by_gics_sector
 from src.data_access.crud_util import DataAccessUtil
 
 
-def plot_ts_gics_sector_pnl(grouped_df):
+def plot_ts_gics_sector_pnl(grouped_df: pd.DataFrame) -> go.Figure:
+    """
+    Create a time series chart showing PnL by GICS sector.
+
+    Parameters:
+    grouped_df (pd.DataFrame): DataFrame with columns 'trade_open_date', 'gics_sector', 'cumulative_pnl', 'cumulative_pnl_pct'
+
+    Returns:
+    go.Figure: Interactive plotly figure showing PnL by sector
+    """
     fig = go.Figure()
 
     # Dropdown options

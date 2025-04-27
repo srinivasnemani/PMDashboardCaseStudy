@@ -1,10 +1,11 @@
 import logging
 
 import pandas as pd
+from sqlalchemy import text
+
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.schemas import UniverseSpec
 from src.data_access.sqllite_db_manager import TableNames, get_db_engine
-from sqlalchemy import text
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

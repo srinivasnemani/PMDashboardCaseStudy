@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
-from src.data_access.crud_util import DataAccessUtil
 from sqlalchemy import text
 
+from src.data_access.crud_util import DataAccessUtil
 
-def get_pnl_time_series_from_trade_data(df):
+
+def get_pnl_time_series_from_trade_data(df: pd.DataFrame) -> pd.DataFrame:
     # Calculate PnL in dollar terms and capital used
     df["trade_pnl"] = df["shares"] * (df["trade_close_price"] - df["trade_open_price"])
     df["trade_exposure"] = abs(df["shares"] * df["trade_open_price"])
@@ -23,7 +24,7 @@ def get_pnl_time_series_from_trade_data(df):
     return daily_result[["trade_open_date", "trade_pnl_usd", "trade_pnl_pct"]]
 
 
-def get_pnl_exposure_time_series(trade_data_df):
+def get_pnl_exposure_time_series(trade_data_df: pd.DataFrame) -> pd.DataFrame:
     # Calculate exposure (positive for long positions, negative for short positions)
     trade_data_df["exposure"] = (
         trade_data_df["shares"] * trade_data_df["trade_open_price"]
@@ -113,7 +114,7 @@ def get_pnl_exposure_time_series(trade_data_df):
     return result
 
 
-def get_pnl_exposure_by_gics_sector(trade_data_df):
+def get_pnl_exposure_by_gics_sector(trade_data_df: pd.DataFrame) -> pd.DataFrame:
     # Calculate exposure
     trade_data_df["exposure"] = (
         trade_data_df["shares"] * trade_data_df["trade_open_price"]
@@ -158,7 +159,7 @@ def get_pnl_exposure_by_gics_sector(trade_data_df):
     return grouped
 
 
-def fetch_pnl_by_gics_sector(strategy_name, start_date, end_date):
+def fetch_pnl_by_gics_sector(strategy_name: str, start_date: str, end_date: str) -> pd.DataFrame:
     sql_query = f""" 
             SELECT 
                 tb.*,

@@ -1,8 +1,11 @@
+from typing import Any, Dict, Optional
+
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
+
 from src.data_access.risk_model import RiskModelDataUtil
 from src.data_access.trade_booking import get_trade_and_sec_master_data
-from sklearn.linear_model import LinearRegression
 
 
 class RiskFactorAttributions:
@@ -19,12 +22,12 @@ class RiskFactorAttributions:
         Filter trades by direction ('Long' or 'Short'). Default is None (all trades).
     """
 
-    def __init__(self, trade_data_df, rm_obj, trade_direction=None):
+    def __init__(self, trade_data_df: pd.DataFrame, rm_obj: Any, trade_direction: Optional[str] = None) -> None:
         self.trade_data_df = trade_data_df
         self.rm_obj = rm_obj
         self.trade_direction = trade_direction
 
-    def compute_factor_pnl_attribution(self):
+    def compute_factor_pnl_attribution(self) -> pd.DataFrame:
         """
         Calculate factor PnL attribution for the portfolio.
 
@@ -137,7 +140,7 @@ class RiskFactorAttributions:
 
         return attribution
 
-    def compute_portfolio_risk_decomposition(self):
+    def compute_portfolio_risk_decomposition(self) -> pd.DataFrame:
         """
         Decomposes portfolio risk into factor and specific risk.
 
@@ -217,7 +220,7 @@ class RiskFactorAttributions:
 
         return risk_decomposition
 
-    def compute_factor_risk_marginal_contributions(self):
+    def compute_factor_risk_marginal_contributions(self) -> pd.DataFrame:
         """
         Computes per-factor contribution to total factor risk.
 
@@ -247,49 +250,67 @@ class RiskFactorAttributions:
         factor_cov_df = rm_obj.factor_covariance
         factor_columns = rm_obj.factor_names
 
-        # Merge
+        # Merge trade and risk data
         merged_df = pd.merge(trade_df, risk_df, on="ticker", how="inner")
+
+        # Calculate market value = shares × price
         merged_df["market_value"] = merged_df["shares"] * merged_df["trade_open_price"]
+
+        # Normalize to get portfolio weights
         total_mv = merged_df["market_value"].sum()
         merged_df["weight"] = merged_df["market_value"] / total_mv
 
-        # Weighted exposures
+        # Construct matrix of weighted factor exposures
         exposure_matrix = merged_df[factor_columns].multiply(
             merged_df["weight"], axis=0
         )
-        portfolio_beta = exposure_matrix.sum().values.reshape(-1, 1)
+        portfolio_factor_exposure = exposure_matrix.sum().values.reshape(-1, 1)
 
-        # Factor risk decomposition
-        factor_cov = factor_cov_df.loc[factor_columns, factor_columns].values
-        total_factor_risk = float(
-            (portfolio_beta.T @ factor_cov @ portfolio_beta)[0, 0]
+        # Factor covariance matrix
+        factor_cov_matrix = factor_cov_df.loc[factor_columns, factor_columns].values
+
+        # Factor risk (systematic)
+        factor_risk = float(
+            (
+                    portfolio_factor_exposure.T
+                    @ factor_cov_matrix
+                    @ portfolio_factor_exposure
+            )[0, 0]
         )
 
-        # Marginal contribution
-        marginal_contrib = (factor_cov @ portfolio_beta).flatten()
-        risk_contrib = portfolio_beta.flatten() * marginal_contrib
+        # Marginal contribution to risk
+        marginal_contribution = (
+                factor_cov_matrix @ portfolio_factor_exposure
+        ).flatten() / np.sqrt(factor_risk)
 
-        # Wrap into DataFrame
-        contrib_df = pd.DataFrame(
+        # Factor risk contribution
+        factor_risk_contribution = (
+                marginal_contribution * portfolio_factor_exposure.flatten()
+        )
+
+        # Normalize contributions to sum to 1
+        contribution_pct = factor_risk_contribution / factor_risk_contribution.sum()
+
+        # Create output DataFrame
+        risk_contributions = pd.DataFrame(
             {
                 "Factor": factor_columns,
-                "Risk Contribution": risk_contrib,
-                "Contribution %": risk_contrib / total_factor_risk,
+                "Marginal Contribution": marginal_contribution,
+                "Risk Contribution": factor_risk_contribution,
+                "Contribution %": contribution_pct,
             }
         )
 
-        return contrib_df.sort_values("Contribution %", ascending=False)
+        return risk_contributions
 
-    def compute_full_risk_decomposition(self):
+    def compute_full_risk_decomposition(self) -> pd.DataFrame:
         """
-        Returns risk decomposition including per-factor contributions and specific risk,
-        normalized to sum to 100% of total portfolio risk.
+        Computes a comprehensive risk decomposition including factor and specific risk contributions.
 
         Returns:
         --------
         pd.DataFrame
-            DataFrame with ['Source', 'Risk Contribution', 'Contribution %']
-            summing to 100% of total portfolio risk.
+            Complete risk decomposition including factor and specific risk contributions.
         """
         trade_df = self.trade_data_df
         rm_obj = self.rm_obj
@@ -312,89 +333,114 @@ class RiskFactorAttributions:
         factor_cov_df = rm_obj.factor_covariance
         factor_columns = rm_obj.factor_names
 
+        # Merge trade and risk data
         merged_df = pd.merge(trade_df, risk_df, on="ticker", how="inner")
+
+        # Calculate market value = shares × price
         merged_df["market_value"] = merged_df["shares"] * merged_df["trade_open_price"]
+
+        # Normalize to get portfolio weights
         total_mv = merged_df["market_value"].sum()
         merged_df["weight"] = merged_df["market_value"] / total_mv
 
-        # Portfolio factor exposure
+        # Construct matrix of weighted factor exposures
         exposure_matrix = merged_df[factor_columns].multiply(
             merged_df["weight"], axis=0
         )
-        portfolio_beta = exposure_matrix.sum().values.reshape(-1, 1)
+        portfolio_factor_exposure = exposure_matrix.sum().values.reshape(-1, 1)
 
-        # Factor risk: βᵗ Σ β
-        factor_cov = factor_cov_df.loc[factor_columns, factor_columns].values
-        total_factor_risk = float(
-            (portfolio_beta.T @ factor_cov @ portfolio_beta)[0, 0]
+        # Factor covariance matrix
+        factor_cov_matrix = factor_cov_df.loc[factor_columns, factor_columns].values
+
+        # Factor risk (systematic)
+        factor_risk = float(
+            (
+                    portfolio_factor_exposure.T
+                    @ factor_cov_matrix
+                    @ portfolio_factor_exposure
+            )[0, 0]
         )
 
-        # Specific risk
+        # Specific risk (idiosyncratic)
         merged_df["specific_variance"] = merged_df["specific_risk"] ** 2
         specific_risk = float(
             (merged_df["weight"] ** 2 * merged_df["specific_variance"]).sum()
         )
 
         # Total risk
-        total_risk = total_factor_risk + specific_risk
+        total_risk = factor_risk + specific_risk
 
-        # Individual factor contributions (marginal)
-        marginal_contrib = (factor_cov @ portfolio_beta).flatten()
-        factor_contrib = portfolio_beta.flatten() * marginal_contrib  # Absolute
+        # Marginal contribution to risk
+        marginal_contribution = (
+                factor_cov_matrix @ portfolio_factor_exposure
+        ).flatten() / np.sqrt(factor_risk)
 
-        # Scale to percentage of total portfolio risk
-        factor_contrib_pct = factor_contrib / total_risk
-        specific_contrib_pct = specific_risk / total_risk
-
-        # Construct unified table
-        data = {
-            "Factor": list(factor_columns) + ["Specific Risk"],
-            "Risk Contribution": list(factor_contrib) + [specific_risk],
-            "Contribution %": list(factor_contrib_pct) + [specific_contrib_pct],
-        }
-
-        return (
-            pd.DataFrame(data)
-            .sort_values("Contribution %", ascending=False)
-            .reset_index(drop=True)
+        # Factor risk contribution
+        factor_risk_contribution = (
+                marginal_contribution * portfolio_factor_exposure.flatten()
         )
 
-    def compute_all_factor_attributions(self):
+        # Create output DataFrame for factors
+        risk_decomposition = pd.DataFrame(
+            {
+                "Factor": factor_columns,
+                "Marginal Contribution": marginal_contribution,
+                "Risk Contribution": factor_risk_contribution,
+                "Contribution %": factor_risk_contribution / total_risk,
+            }
+        )
+
+        # Add specific risk row
+        specific_row = pd.Series(
+            {
+                "Factor": "Specific Risk",
+                "Marginal Contribution": np.nan,
+                "Risk Contribution": specific_risk,
+                "Contribution %": specific_risk / total_risk,
+            },
+            name="Specific",
+        )
+
+        # Append the row to the DataFrame
+        risk_decomposition = pd.concat([risk_decomposition, specific_row.to_frame().T])
+
+        # Normalize contribution percentages to sum to 1
+        risk_decomposition["Contribution %"] = risk_decomposition["Risk Contribution"] / risk_decomposition["Risk Contribution"].sum()
+
+        return risk_decomposition
+
+    def compute_all_factor_attributions(self) -> Dict[str, pd.DataFrame]:
         """
-        Get attribution_results from all four methods.
+        Computes all factor attributions and returns them in a dictionary.
 
         Returns:
         --------
-        dict
-            A dictionary containing the attribution_results of all four calculation methods.
+        Dict[str, pd.DataFrame]
+            Dictionary containing all factor attributions.
         """
-        attribution_results = {
-            "factor_pnl_attribution": self.compute_factor_pnl_attribution(),
-            "portfolio_risk_decomposition": self.compute_portfolio_risk_decomposition(),
-            "factor_risk_marginal_contributions": self.compute_factor_risk_marginal_contributions(),
-            "full_risk_decomposition": self.compute_full_risk_decomposition(),
+        pnl_attribution = self.compute_factor_pnl_attribution()
+        risk_decomposition = self.compute_portfolio_risk_decomposition()
+        factor_risk_contributions = self.compute_factor_risk_marginal_contributions()
+        full_risk_decomposition = self.compute_full_risk_decomposition()
+
+        return {
+            "factor_pnl_attribution": pnl_attribution,
+            "portfolio_risk_decomposition": risk_decomposition,
+            "factor_risk_marginal_contributions": factor_risk_contributions,
+            "full_risk_decomposition": full_risk_decomposition,
         }
-        return attribution_results
 
 
-def demo_run():
-    model_date = "2024-07-19"
-    trade_data_df = get_trade_and_sec_master_data("MinVol", model_date, model_date)
-
-    rm_obj = RiskModelDataUtil.fetch_risk_model(model_date)
-    result_df = pd.merge(
-        rm_obj.factor_exposures,
-        rm_obj.sp_risk_residuals,
-        on=["date", "ticker"],
-        how="left",
-    )
-
-    risk_analysis = RiskFactorAttributions(trade_data_df, rm_obj)
-
-    # Get results for all trades
-    all_results = risk_analysis.compute_all_factor_attributions()
-    df = all_results["full_risk_decomposition"]
-    df.to_clipboard()
+def demo_run() -> None:
+    """
+    Demo function to run the risk factor attributions.
+    """
+    # Example usage
+    trade_data = get_trade_and_sec_master_data("MinVol", "2024-01-01", "2024-12-31")
+    risk_model = RiskModelDataUtil()
+    risk_attributions = RiskFactorAttributions(trade_data, risk_model)
+    results = risk_attributions.compute_all_factor_attributions()
+    print(results)
 
 
 # Example usage

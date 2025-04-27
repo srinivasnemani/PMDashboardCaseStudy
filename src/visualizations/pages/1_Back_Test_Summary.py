@@ -1,5 +1,6 @@
-import sys
 import os
+import sys
+
 import streamlit as st
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -8,7 +9,6 @@ from src.visualizations.data_preparation.backtest_summary import \
     create_back_test_summary
 from src.visualizations.ui_elements.side_bar_user_selections import \
     fetch_user_selection_strategies_and_bt_dates
-
 
 # Append project root to sys.path
 

@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from src.portfolio_construction.optimizers.cvxpy_optimizer import cvx_optimizer
 
 

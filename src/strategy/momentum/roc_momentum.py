@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.prices import PriceDataFetcher
 from src.data_access.schemas import UniverseSpec

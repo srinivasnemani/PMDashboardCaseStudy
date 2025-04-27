@@ -1,6 +1,7 @@
 import pandas as pd
-import numpy as np
-from src.portfolio_construction.optimizers.create_portfolio_weights import construct_portfolio_weights
+
+from src.portfolio_construction.optimizers.create_portfolio_weights import \
+    construct_portfolio_weights
 
 
 def test_construct_portfolio_weights_basic():

@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+
 from src.analytics.risk_attributions import RiskFactorAttributions
 
 

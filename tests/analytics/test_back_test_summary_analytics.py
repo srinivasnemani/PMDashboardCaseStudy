@@ -1,8 +1,8 @@
-import numpy as np
 import pandas as pd
 import pytest
+
 from src.analytics.back_test_summary import (BackTestSummaryAnalytics,
-                                         BackTestSummaryAnalyticsData)
+                                             BackTestSummaryAnalyticsData)
 
 
 def create_sample_data(

@@ -1,5 +1,6 @@
 import pandas as pd
 import yfinance as yf
+
 from data_prep.sp500_data.store_sp500_ts_data import store_sp500_index_price
 
 store_sp500_index_price()

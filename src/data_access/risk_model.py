@@ -1,7 +1,8 @@
+from sqlalchemy import text
+
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.schemas import RiskModel
 from src.data_access.sqllite_db_manager import TableNames
-from sqlalchemy import text
 
 
 class RiskModelDataUtil:

@@ -1,10 +1,23 @@
+from typing import Literal
+
+import pandas as pd
 import plotly.graph_objects as go
 from sqlalchemy import text
 
 from src.data_access.crud_util import DataAccessUtil
 
 
-def render_exposure_time_series(df, measure_type="USD"):
+def render_exposure_time_series(df: pd.DataFrame, measure_type: Literal["USD", "Pct", "PnL"] = "USD") -> go.Figure:
+    """
+    Render a time series plot of exposures.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing exposure data
+    measure_type (str): Type of measure to plot ("USD", "Pct", or "PnL")
+
+    Returns:
+    go.Figure: Plotly figure showing exposure time series
+    """
     # Plot it
     fig = go.Figure()
     if measure_type == "USD":
@@ -48,7 +61,17 @@ def render_exposure_time_series(df, measure_type="USD"):
     return fig
 
 
-def render_leverage_time_series(df, measure_type="leverage"):
+def render_leverage_time_series(df: pd.DataFrame, measure_type: Literal["Leverage", "Capital", "Target Exposure"] = "Leverage") -> go.Figure:
+    """
+    Render a time series plot of leverage metrics.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing leverage data
+    measure_type (str): Type of measure to plot ("Leverage", "Capital", or "Target Exposure")
+
+    Returns:
+    go.Figure: Plotly figure showing leverage time series
+    """
     # Plot it
     fig = go.Figure()
     if measure_type == "Leverage":

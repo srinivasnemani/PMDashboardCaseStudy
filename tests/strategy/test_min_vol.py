@@ -1,7 +1,5 @@
-import pandas as pd
-import numpy as np
-from src.strategy.min_vol.min_vol import MinVolSignal, MinVolSignalData
 from src.data_access.schemas import UniverseSpec
+from src.strategy.min_vol.min_vol import MinVolSignal, MinVolSignalData
 
 
 def test_min_vol_signal_initialization():

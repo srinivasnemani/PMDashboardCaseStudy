@@ -3,7 +3,21 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
-def plot_portfolio_risk_decomposition(df):
+def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
+    """
+    Create a visualization of portfolio risk decomposition.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing risk decomposition data with columns:
+        - Factor Risk
+        - Specific Risk
+        - Total Risk
+        - Factor %
+        - Specific %
+
+    Returns:
+    go.Figure: Plotly figure showing risk decomposition
+    """
     factor_risk_pct = df["Factor Risk"].iloc[0]
     specific_risk_pct = df["Specific Risk"].iloc[0]
     total_risk_pct = df["Total Risk"].iloc[0]

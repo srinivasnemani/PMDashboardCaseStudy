@@ -1,7 +1,8 @@
-from src.data_access.crud_util import DataAccessUtil
-from src.data_access.sqllite_db_manager import TableNames, get_db_engine
 from sqlalchemy import MetaData, Table
 from sqlalchemy.sql import and_, delete, or_, text
+
+from src.data_access.crud_util import DataAccessUtil
+from src.data_access.sqllite_db_manager import TableNames, get_db_engine
 
 
 def get_trade_and_sec_master_data(strategy_name, start_date, end_date):

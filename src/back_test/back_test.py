@@ -3,14 +3,16 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
+from sqlalchemy import text
+
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.prices import PriceDataFetcher
 from src.data_access.schemas import UniverseSpec
 from src.data_access.sqllite_db_manager import TableNames
 from src.data_access.trade_booking import update_trades
-from src.rebalance.rebalance_portfolio import (RebalancePortfolio, RebalanceUtil,
+from src.rebalance.rebalance_portfolio import (RebalancePortfolio,
+                                               RebalanceUtil,
                                                create_rebalance_data)
-from sqlalchemy import text
 
 
 @dataclass

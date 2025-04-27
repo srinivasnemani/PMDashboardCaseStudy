@@ -4,7 +4,7 @@ import streamlit as st
 from sqlalchemy import text
 
 from src.analytics.trade_summary import (get_pnl_exposure_by_gics_sector,
-                                     get_pnl_exposure_time_series)
+                                         get_pnl_exposure_time_series)
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.trade_booking import get_trade_and_sec_master_data
 from src.visualizations.charts.pnl_ts_chart_by_gics_sector import \

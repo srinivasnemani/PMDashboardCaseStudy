@@ -2,7 +2,7 @@ import pandas as pd
 from sqlalchemy import text
 
 from src.analytics.back_test_summary import (BackTestSummaryAnalytics,
-                                         BackTestSummaryAnalyticsData)
+                                             BackTestSummaryAnalyticsData)
 from src.analytics.trade_summary import get_pnl_time_series_from_trade_data
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.prices import PriceDataFetcher

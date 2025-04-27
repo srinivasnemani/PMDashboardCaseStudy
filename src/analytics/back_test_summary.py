@@ -21,7 +21,7 @@ class BackTestSummaryAnalyticsData:
     data: pd.DataFrame
     trading_days_per_year: int = 252
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate and prepare data after initialization."""
 
         self.data = self.data.copy()
@@ -50,7 +50,7 @@ class BackTestSummaryAnalytics:
     for portfolio evaluation.
     """
 
-    def __init__(self, backtest_data: BackTestSummaryAnalyticsData):
+    def __init__(self, backtest_data: BackTestSummaryAnalyticsData) -> None:
         """
         Initialize the backtesting class with backtest data.
 
@@ -65,7 +65,7 @@ class BackTestSummaryAnalytics:
         # Calculate cumulative returns
         self._calculate_cumulative_returns()
 
-    def _calculate_cumulative_returns(self):
+    def _calculate_cumulative_returns(self) -> None:
         """Calculate cumulative returns for portfolio and benchmark."""
         self.data["portfolio_cumulative"] = (
             1 + self.data["portfolio_returns"]
@@ -243,31 +243,26 @@ class BackTestSummaryAnalytics:
         """
         metrics = self.calculate_all_metrics()
 
+        # Create a list to store tuples for MultiIndex
+        index_tuples = []
+        values = []
+        
         # Format category and metric names
-        formatted_metrics = {}
         for category, metrics_dict in metrics.items():
             # Format category name: remove underscores and capitalize first letter of each word
-            formatted_category = " ".join(
-                word.capitalize() for word in category.split("_")
-            )
-
-            for metric_name, value in metrics_dict.items():
-                # Format metric name: remove underscores and capitalize first letter of each word
-                formatted_metric = " ".join(
-                    word.capitalize() for word in metric_name.split("_")
-                )
-                formatted_metrics[(formatted_category, formatted_metric)] = value
-
-        # Create multi-index DataFrame
-        index_tuples = list(formatted_metrics.keys())
-        multi_index = pd.MultiIndex.from_tuples(
-            index_tuples, names=["Category", "Metric"]
-        )
-
-        summary_df = pd.DataFrame(
-            {"Value": list(formatted_metrics.values())}, index=multi_index
-        )
-
+            formatted_category = " ".join(word.capitalize() for word in category.split("_"))
+            
+            # Add each metric to the index tuples and values list
+            for metric, value in metrics_dict.items():
+                index_tuples.append((formatted_category, metric))
+                values.append(value)
+        
+        # Create MultiIndex
+        multi_index = pd.MultiIndex.from_tuples(index_tuples, names=["Category", "Metric"])
+        
+        # Create DataFrame with MultiIndex
+        summary_df = pd.DataFrame(values, index=multi_index, columns=["Value"])
+        
         return summary_df
 
 

@@ -3,12 +3,13 @@ from datetime import date
 
 import numpy as np
 import pandas as pd
+from sqlalchemy import text
+
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.sqllite_db_manager import TableNames
 from src.portfolio_construction.optimizers.cvxpy_optimizer import cvx_optimizer
 from src.portfolio_construction.optimizers.greedy_allocation import \
     greedy_allocation
-from sqlalchemy import text
 
 
 @dataclass

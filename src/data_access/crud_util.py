@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+
 from src.data_access.sqllite_db_manager import get_db_engine
 
 # Configure logging
