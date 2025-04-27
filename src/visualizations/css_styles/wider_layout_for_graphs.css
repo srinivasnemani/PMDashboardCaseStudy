@@ -1,0 +1,17 @@
+    <style>
+    .reportview-container .main .block-container {
+        max-width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .plotly-graph-div {
+        width: 100% !important;
+        border: 1px solid #d3d3d3;		
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;		
+    }
+    </style>

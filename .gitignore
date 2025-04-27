@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+*.pkl
+*.jpg
+*.docx
+*.csv
+*.png
+*.sqlite
+*.tmp
+*.pytest_cache
+*.ruff_cache
+
+# Virtual environments
+.venv

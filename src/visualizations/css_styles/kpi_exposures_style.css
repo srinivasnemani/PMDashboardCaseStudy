@@ -1,0 +1,42 @@
+.kpi_exposures_style table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    background-color: #f5faff;
+    border: 0.5px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.kpi_exposures_style th {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    font-weight: bold;
+    background-color: #f7f7f7;
+    vertical-align: middle; /* Added this line */
+}
+
+.kpi_exposures_style td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    transition: background-color 0.2s ease-in-out;
+    vertical-align: middle; /* Added this line */
+}
+
+/* First column bold */
+.kpi_exposures_style td:first-child {
+    font-weight: bold;
+}
+
+/* Zebra striping */
+.kpi_exposures_style tr:nth-child(even) td {
+    background-color: #f0faff;
+}
+
+/* Hover effect */
+.kpi_exposures_style tr:hover td {
+    background-color: #e6f4ff;
+}
