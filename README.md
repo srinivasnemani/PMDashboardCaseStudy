@@ -1,6 +1,6 @@
-# Portfolio Management Dashboard
+# Backtesting Dashboard
 
-A portfolio management and back testing demo.
+A Backtesting/portfolio management dashboard demo
 
 ## Features
 
