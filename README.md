@@ -41,7 +41,6 @@ A Backtesting/portfolio management dashboard demo
 
 - **Visualization**
   - Plotly
-  - Plotly
   - Matplotlib
   - Seaborn
 
