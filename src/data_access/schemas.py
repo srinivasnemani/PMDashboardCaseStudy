@@ -6,7 +6,7 @@ import pandas as pd
 
 @dataclass
 class UniverseSpec:
-    universe: str = 'sp500'
+    universe: str = "sp500"
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     day_frequency: Optional[str] = None

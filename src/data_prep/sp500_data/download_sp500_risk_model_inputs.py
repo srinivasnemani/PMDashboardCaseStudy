@@ -7,10 +7,12 @@ import yfinance as yf
 def get_sp500_tickers():
     try:
         # Read Wikipedia table using pandas
-        sp500_info = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
-        sp500_info = sp500_info[['Symbol']]
-        sp500_info['Symbol'] = sp500_info['Symbol'].str.replace('.', '-', regex=False)
-        return sp500_info['Symbol'].tolist()
+        sp500_info = pd.read_html(
+            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        )[0]
+        sp500_info = sp500_info[["Symbol"]]
+        sp500_info["Symbol"] = sp500_info["Symbol"].str.replace(".", "-", regex=False)
+        return sp500_info["Symbol"].tolist()
     except Exception as e:
         print(f"Error getting S&P 500 information: {e}")
         return []
@@ -30,18 +32,20 @@ def fetch_fundamental_data(tickers):
 
             market_cap = info.get("marketCap", np.nan)
 
-            data.append({
-                "Ticker": ticker,
-                "PriceToBook": info.get("priceToBook", np.nan),
-                "LogMarketCap": np.log(market_cap) if market_cap else np.nan,
-                "ReturnOnEquity": info.get("returnOnEquity", np.nan),
-                "Beta": info.get("beta", np.nan),
-                "DebtToEquity": info.get("debtToEquity", np.nan),
-                "EarningsGrowth": info.get("earningsGrowth", np.nan),
-                "TrailingEPS": info.get("trailingEps", np.nan),
-                "AnalystRecommendationMean": info.get("recommendationMean", np.nan),
-                "ShortPercentOfFloat": info.get("shortPercentOfFloat", np.nan)
-            })
+            data.append(
+                {
+                    "Ticker": ticker,
+                    "PriceToBook": info.get("priceToBook", np.nan),
+                    "LogMarketCap": np.log(market_cap) if market_cap else np.nan,
+                    "ReturnOnEquity": info.get("returnOnEquity", np.nan),
+                    "Beta": info.get("beta", np.nan),
+                    "DebtToEquity": info.get("debtToEquity", np.nan),
+                    "EarningsGrowth": info.get("earningsGrowth", np.nan),
+                    "TrailingEPS": info.get("trailingEps", np.nan),
+                    "AnalystRecommendationMean": info.get("recommendationMean", np.nan),
+                    "ShortPercentOfFloat": info.get("shortPercentOfFloat", np.nan),
+                }
+            )
         except Exception as e:
             print(f"Failed for {ticker}: {e}")
     return pd.DataFrame(data)

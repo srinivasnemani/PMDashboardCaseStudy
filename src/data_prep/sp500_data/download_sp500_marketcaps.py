@@ -9,13 +9,17 @@ import yfinance as yf
 def get_sp500_info():
     try:
         # Read the Wikipedia table
-        sp500_info = pd.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')[0]
+        sp500_info = pd.read_html(
+            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        )[0]
 
         # Select only the required columns
-        sp500_info = sp500_info[['Symbol', 'Security', 'GICS Sector', 'GICS Sub-Industry', 'CIK']]
+        sp500_info = sp500_info[
+            ["Symbol", "Security", "GICS Sector", "GICS Sub-Industry", "CIK"]
+        ]
 
         # Fix ticker symbols that use dots instead of hyphens
-        sp500_info['Symbol'] = sp500_info['Symbol'].str.replace('.', '-')
+        sp500_info["Symbol"] = sp500_info["Symbol"].str.replace(".", "-")
 
         return sp500_info
     except Exception as e:
@@ -35,7 +39,7 @@ def get_daily_market_caps(start_date, end_date, output_dir):
         return None
 
     print(f"Retrieved information for {len(sp500_info)} companies")
-    tickers = sp500_info['Symbol'].tolist()
+    tickers = sp500_info["Symbol"].tolist()
 
     # Save security info to CSV
     sp500_info.to_csv(f"{output_dir}/sp500_security_info.csv", index=False)
@@ -61,18 +65,20 @@ def get_daily_market_caps(start_date, end_date, output_dir):
             if not hist.empty:
                 # Get shares outstanding
                 try:
-                    shares = stock.info.get('sharesOutstanding', None)
+                    shares = stock.info.get("sharesOutstanding", None)
 
                     if shares:
                         # Calculate daily market cap (shares * daily close price)
-                        market_cap = hist['Close'] * shares
+                        market_cap = hist["Close"] * shares
                         market_cap.name = ticker
 
                         if all_market_caps.empty:
                             all_market_caps = pd.DataFrame(market_cap, columns=[ticker])
                         else:
                             new_data = pd.DataFrame(market_cap, columns=[ticker])
-                            all_market_caps = pd.concat([all_market_caps, new_data], axis=1)
+                            all_market_caps = pd.concat(
+                                [all_market_caps, new_data], axis=1
+                            )
 
                 except Exception as e:
                     print(f"Error calculating market cap for {ticker}: {e}")
@@ -94,7 +100,9 @@ def get_daily_market_caps(start_date, end_date, output_dir):
         # Convert to billions for readability and save
         market_caps_billions = all_market_caps / 1_000_000_000
         market_caps_billions.to_csv(f"{output_dir}/sp500_market_caps_billions_usd.csv")
-        print(f"Market cap data in billions saved to {output_dir}/sp500_market_caps_billions_usd.csv")
+        print(
+            f"Market cap data in billions saved to {output_dir}/sp500_market_caps_billions_usd.csv"
+        )
 
         return all_market_caps
 
@@ -102,8 +110,8 @@ def get_daily_market_caps(start_date, end_date, output_dir):
 
 
 # Set date range
-start_date = '2023-09-01'
-end_date = '2025-03-31'
+start_date = "2023-09-01"
+end_date = "2025-03-31"
 
 # Get and save daily market cap data to CSV files
 output_directory = "sp500_data"

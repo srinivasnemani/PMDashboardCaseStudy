@@ -25,13 +25,13 @@ def get_pnl_time_series_from_trade_data(df: pd.DataFrame) -> pd.DataFrame:
 def get_pnl_exposure_time_series(trade_data_df: pd.DataFrame) -> pd.DataFrame:
     # Calculate exposure (positive for long positions, negative for short positions)
     trade_data_df["exposure"] = (
-            trade_data_df["shares"] * trade_data_df["trade_open_price"]
+        trade_data_df["shares"] * trade_data_df["trade_open_price"]
     )
     # Calculate PnL (shares * price difference)
     # - For long positions (positive shares), PnL is positive when close > open
     # - For short positions (negative shares), PnL is positive when close < open
     trade_data_df["pnl"] = trade_data_df["shares"] * (
-            trade_data_df["trade_close_price"] - trade_data_df["trade_open_price"]
+        trade_data_df["trade_close_price"] - trade_data_df["trade_open_price"]
     )
     # Create a mask to identify long and short positions
     long_mask = trade_data_df["shares"] > 0
@@ -74,25 +74,25 @@ def get_pnl_exposure_time_series(trade_data_df: pd.DataFrame) -> pd.DataFrame:
     # Time-weighted return calculations
     # 1. Calculate daily returns (avoiding division by zero)
     result["daily_long_return"] = np.where(
-        result["long_exposure"] != 0,
-        result["long_pnl"] / result["long_exposure"],
-        0
+        result["long_exposure"] != 0, result["long_pnl"] / result["long_exposure"], 0
     )
     result["daily_short_return"] = np.where(
         result["short_exposure"].abs() != 0,
         result["short_pnl"] / result["short_exposure"].abs(),
-        0
+        0,
     )
     result["daily_total_return"] = np.where(
-        result["total_exposure"] != 0,
-        result["total_pnl"] / result["total_exposure"],
-        0
+        result["total_exposure"] != 0, result["total_pnl"] / result["total_exposure"], 0
     )
 
     # 2. Calculate cumulative returns using compounding (1+r)
     result["cumulative_long_pnl_pct"] = (1 + result["daily_long_return"]).cumprod() - 1
-    result["cumulative_short_pnl_pct"] = (1 + result["daily_short_return"]).cumprod() - 1
-    result["cumulative_total_pnl_pct"] = (1 + result["daily_total_return"]).cumprod() - 1
+    result["cumulative_short_pnl_pct"] = (
+        1 + result["daily_short_return"]
+    ).cumprod() - 1
+    result["cumulative_total_pnl_pct"] = (
+        1 + result["daily_total_return"]
+    ).cumprod() - 1
 
     # Replace NaN with 0 for dates with no exposure
     result["cumulative_long_pnl_pct"] = result["cumulative_long_pnl_pct"].fillna(0)
@@ -101,6 +101,7 @@ def get_pnl_exposure_time_series(trade_data_df: pd.DataFrame) -> pd.DataFrame:
 
     result = result.reset_index()
     return result
+
 
 def get_pnl_exposure_by_gics_sector(trade_data_df: pd.DataFrame) -> pd.DataFrame:
     # Calculate exposure
@@ -134,8 +135,9 @@ def get_pnl_exposure_by_gics_sector(trade_data_df: pd.DataFrame) -> pd.DataFrame
     # Calculate cumulative sums by sector
     grouped["cumulative_pnl"] = grouped.groupby("gics_sector")["pnl"].cumsum()
     # grouped["cumulative_exposure"] = grouped.groupby("gics_sector")["exposure"].cumsum()
-    grouped["cumulative_exposure"] = grouped.groupby("gics_sector")["exposure"].transform(lambda x: x.abs().cumsum())
-
+    grouped["cumulative_exposure"] = grouped.groupby("gics_sector")[
+        "exposure"
+    ].transform(lambda x: x.abs().cumsum())
 
     grouped["cumulative_pnl_pct"] = np.where(
         grouped["cumulative_exposure"] != 0,
@@ -146,7 +148,9 @@ def get_pnl_exposure_by_gics_sector(trade_data_df: pd.DataFrame) -> pd.DataFrame
     return grouped
 
 
-def fetch_pnl_by_gics_sector(strategy_name: str, start_date: str, end_date: str) -> pd.DataFrame:
+def fetch_pnl_by_gics_sector(
+    strategy_name: str, start_date: str, end_date: str
+) -> pd.DataFrame:
     sql_query = f""" 
             SELECT 
                 tb.*,

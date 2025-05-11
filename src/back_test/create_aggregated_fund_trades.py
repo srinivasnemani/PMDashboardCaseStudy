@@ -21,7 +21,7 @@ def create_aggregated_fund_trades():
         print("No trades found in the database")
         return
 
-    trades_df['strategy_name'] = "AggregatedFund"
+    trades_df["strategy_name"] = "AggregatedFund"
 
     delete_query = f"""
         DELETE FROM {trade_booking_tbl}
@@ -32,15 +32,17 @@ def create_aggregated_fund_trades():
     success = DataAccessUtil.store_dataframe_to_table(
         dataframe=trades_df,
         table_name=trade_booking_tbl,
-        if_exists='append',
-        index=False
+        if_exists="append",
+        index=False,
     )
 
     if success:
-        print(f"Successfully created aggregated fund trades with {len(trades_df)} entries")
+        print(
+            f"Successfully created aggregated fund trades with {len(trades_df)} entries"
+        )
     else:
         print("Failed to create aggregated fund trades")
 
 
 if __name__ == "__main__":
-    create_aggregated_fund_trades() 
+    create_aggregated_fund_trades()

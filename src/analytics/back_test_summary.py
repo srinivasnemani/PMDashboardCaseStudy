@@ -50,48 +50,50 @@ class BackTestSummaryAnalyticsData:
     def _detect_frequency(self) -> str:
         """
         Detect the frequency of the data based on the time index.
-        
+
         Returns:
         --------
         str
             Frequency of the data ('D' for daily, 'W' for weekly, etc.)
         """
         if len(self.data) < 2:
-            return 'D'  # Default to daily if not enough data points
-            
+            return "D"  # Default to daily if not enough data points
+
         time_diff = self.data.index[1] - self.data.index[0]
         days = time_diff.days
-        
+
         if days == 1:
-            return 'D'  # Daily
+            return "D"  # Daily
         elif days == 7:
-            return 'W'  # Weekly
+            return "W"  # Weekly
         elif days == 30 or days == 31:
-            return 'M'  # Monthly
+            return "M"  # Monthly
         elif days == 90 or days == 91:
-            return 'Q'  # Quarterly
+            return "Q"  # Quarterly
         elif days == 365 or days == 366:
-            return 'Y'  # Yearly
+            return "Y"  # Yearly
         else:
-            return 'D'  # Default to daily if frequency cannot be determined
+            return "D"  # Default to daily if frequency cannot be determined
 
     def _calculate_annualization_factor(self) -> float:
         """
         Calculate the appropriate annualization factor based on data frequency.
-        
+
         Returns:
         --------
         float
             Annualization factor for the given frequency
         """
         frequency_factors = {
-            'D': np.sqrt(252),  # Daily
-            'W': np.sqrt(52),   # Weekly
-            'M': np.sqrt(12),   # Monthly
-            'Q': np.sqrt(4),    # Quarterly
-            'Y': 1.0            # Yearly
+            "D": np.sqrt(252),  # Daily
+            "W": np.sqrt(52),  # Weekly
+            "M": np.sqrt(12),  # Monthly
+            "Q": np.sqrt(4),  # Quarterly
+            "Y": 1.0,  # Yearly
         }
-        return frequency_factors.get(self.frequency, np.sqrt(252))  # Default to daily if unknown
+        return frequency_factors.get(
+            self.frequency, np.sqrt(252)
+        )  # Default to daily if unknown
 
 
 class BackTestSummaryAnalytics:
@@ -100,7 +102,7 @@ class BackTestSummaryAnalytics:
     for portfolio evaluation.
     """
 
-    def __init__(self, backtest_data: 'BackTestSummaryAnalyticsData') -> None:
+    def __init__(self, backtest_data: "BackTestSummaryAnalyticsData") -> None:
         """
         Initialize the backtesting class with backtest data.
 
@@ -119,11 +121,11 @@ class BackTestSummaryAnalytics:
     def _calculate_cumulative_returns(self) -> None:
         """Calculate cumulative returns for portfolio and benchmark."""
         self.data["portfolio_cumulative"] = (
-                                                    1 + self.data["portfolio_returns"]
-                                            ).cumprod() - 1
+            1 + self.data["portfolio_returns"]
+        ).cumprod() - 1
         self.data["benchmark_cumulative"] = (
-                                                    1 + self.data["benchmark_returns"]
-                                            ).cumprod() - 1
+            1 + self.data["benchmark_returns"]
+        ).cumprod() - 1
 
     def calculate_all_metrics(self) -> Dict[str, Any]:
         """
@@ -194,7 +196,9 @@ class BackTestSummaryAnalytics:
         downside_returns = portfolio_returns[is_downside] - risk_free_rate[is_downside]
 
         downside_deviation = (
-            downside_returns.std() * self.annualization_factor if len(downside_returns) > 0 else 0
+            downside_returns.std() * self.annualization_factor
+            if len(downside_returns) > 0
+            else 0
         )
         sortino_ratio = (
             ann_excess_return / downside_deviation if downside_deviation != 0 else 0
@@ -234,7 +238,7 @@ class BackTestSummaryAnalytics:
         risk_free_rate = self.data["risk_free_rate"]
 
         covariance = (
-                portfolio_returns.cov(benchmark_returns) * self.annualization_factor
+            portfolio_returns.cov(benchmark_returns) * self.annualization_factor
         )
         benchmark_variance = benchmark_returns.var() * self.annualization_factor
         beta = covariance / benchmark_variance if benchmark_variance != 0 else 0
@@ -301,13 +305,13 @@ class BackTestSummaryAnalytics:
         """
         portfolio_returns = self.data["portfolio_returns"]
         benchmark_returns = self.data["benchmark_returns"]
-        
+
         # Calculate active returns (portfolio - benchmark)
         active_returns = portfolio_returns - benchmark_returns
-        
+
         # Calculate tracking error (standard deviation of active returns, annualized)
         tracking_error = active_returns.std() * np.sqrt(self.trading_days_per_year)
-        
+
         return tracking_error
 
     def summary(self) -> pd.DataFrame:
@@ -334,7 +338,9 @@ class BackTestSummaryAnalytics:
                 values.append(value)
 
         # Create MultiIndex
-        multi_index = pd.MultiIndex.from_tuples(index_tuples, names=["Category", "Metric"])
+        multi_index = pd.MultiIndex.from_tuples(
+            index_tuples, names=["Category", "Metric"]
+        )
 
         # Create DataFrame with MultiIndex
         summary_df = pd.DataFrame(values, index=multi_index, columns=["Value"])

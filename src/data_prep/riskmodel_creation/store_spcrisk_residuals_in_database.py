@@ -15,7 +15,8 @@ conn = sqlite3.connect(sqlite_path)
 cursor = conn.cursor()
 
 # Create the table if it doesn't exist
-cursor.execute("""
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS sprisk_residuals (
         date TEXT,
         ticker TEXT,
@@ -23,15 +24,18 @@ cursor.execute("""
         residual REAL,
         PRIMARY KEY (date, ticker)
     )
-""")
+"""
+)
+
 
 # Optional: helper to infer date from filename
 def infer_date_from_filename(filename):
-    digits = ''.join(filter(str.isdigit, os.path.basename(filename)))
+    digits = "".join(filter(str.isdigit, os.path.basename(filename)))
     try:
         return datetime.strptime(digits, "%Y%m%d").date()
     except ValueError:
         return None
+
 
 # Process all .pkl files
 pkl_files = glob.glob(os.path.join(folder_path, "*.pkl"))
@@ -59,18 +63,18 @@ for file_path in pkl_files:
             continue
 
         # Transform to DataFrame with ticker as index
-        sr_df = specific_risk.to_frame(name='specific_risk')
+        sr_df = specific_risk.to_frame(name="specific_risk")
         res_df = residuals.T
-        res_df.columns = ['residual']# Ticker as index
+        res_df.columns = ["residual"]  # Ticker as index
         # if as_of_date not in residuals.index:
         #     raise ValueError(f"Residuals do not have entry for as_of_date: {as_of_date}")
 
         # Get residuals for the date and join
         # res_row = res_df[[as_of_date]].rename(columns={as_of_date: 'residual'})
-        merged = sr_df.join(res_df, how='inner').reset_index()
-        merged['date'] = as_of_date
-        merged = merged[['date', 'Ticker', 'specific_risk', 'residual']]
-        merged.columns = ['date', 'ticker', 'specific_risk', 'residual']
+        merged = sr_df.join(res_df, how="inner").reset_index()
+        merged["date"] = as_of_date
+        merged = merged[["date", "Ticker", "specific_risk", "residual"]]
+        merged.columns = ["date", "ticker", "specific_risk", "residual"]
 
         # Insert into SQLite
         insert_sql = """

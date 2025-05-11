@@ -40,7 +40,7 @@ class DataAccessUtil:
                         params = (params,)
                     conn.execute(text(sql_query), params)
                 conn.commit()
-            
+
             logger.info("SQL statement executed successfully")
             return True
         except Exception as e:
@@ -54,12 +54,18 @@ class DataAccessUtil:
             engine = get_db_engine()
 
         with engine.connect() as conn:
-            result = conn.execute(sql_query) if params is None else conn.execute(sql_query, params)
+            result = (
+                conn.execute(sql_query)
+                if params is None
+                else conn.execute(sql_query, params)
+            )
             df = pd.DataFrame(result.fetchall(), columns=result.keys())
 
-        if not df.empty and ('date' in df.columns):
-            df['date'] = pd.to_datetime(df['date'])
-            logger.info(f"Date range in result: {df['date'].min()} to {df['date'].max()}")
+        if not df.empty and ("date" in df.columns):
+            df["date"] = pd.to_datetime(df["date"])
+            logger.info(
+                f"Date range in result: {df['date'].min()} to {df['date'].max()}"
+            )
             logger.info(f"Total rows: {len(df)}")
         else:
             logger.warning("Query returned no results")
@@ -67,7 +73,9 @@ class DataAccessUtil:
         return df
 
     @staticmethod
-    def store_dataframe_to_table(dataframe, table_name, if_exists='append', index=False, engine=None):
+    def store_dataframe_to_table(
+        dataframe, table_name, if_exists="append", index=False, engine=None
+    ):
         """
         Stores a pandas DataFrame to a database table.
 
@@ -90,9 +98,11 @@ class DataAccessUtil:
                 con=engine,
                 if_exists=if_exists,
                 index=index,
-                chunksize=100_000
+                chunksize=100_000,
             )
-            logger.info(f"Successfully stored {len(dataframe)} rows to table '{table_name}'")
+            logger.info(
+                f"Successfully stored {len(dataframe)} rows to table '{table_name}'"
+            )
             return True
         except Exception as e:
             logger.error(f"Error storing DataFrame to table '{table_name}': {str(e)}")

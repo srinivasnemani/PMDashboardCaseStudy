@@ -8,7 +8,12 @@ from src.analytics.trade_summary import get_pnl_exposure_time_series
 from src.data_access.crud_util import DataAccessUtil
 
 
-def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'trade_open_date', height: int = 600, width: Optional[int] = None) -> go.Figure:
+def plot_pnl_series_by_trade_direction(
+    df: pd.DataFrame,
+    date_column: str = "trade_open_date",
+    height: int = 600,
+    width: Optional[int] = None,
+) -> go.Figure:
     """
     Create a PnL chart from the output of get_exposures_series_from_trade_data function.
     Shows Long, Short, and Total PnL with toggles between daily and cumulative views.
@@ -30,36 +35,36 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_long_pnl'],
+            y=df["cumulative_long_pnl"],
             name="Long (USD)",
-            line=dict(color='#1f77b4', width=2),  # Blue
+            line=dict(color="#1f77b4", width=2),  # Blue
             visible=True,
-            legendgroup='long',
-            mode='lines'
+            legendgroup="long",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_short_pnl'],
+            y=df["cumulative_short_pnl"],
             name="Short (USD)",
-            line=dict(color='#d62728', width=2),  # Red
+            line=dict(color="#d62728", width=2),  # Red
             visible=True,
-            legendgroup='short',
-            mode='lines'
+            legendgroup="short",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_total_pnl'],
+            y=df["cumulative_total_pnl"],
             name="Total (USD)",
-            line=dict(color='#2ca02c', width=2),  # Green
+            line=dict(color="#2ca02c", width=2),  # Green
             visible=True,
-            legendgroup='total',
-            mode='lines'
+            legendgroup="total",
+            mode="lines",
         )
     )
 
@@ -68,36 +73,36 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_long_pnl_pct'],  # Already in decimal form for tickformat
+            y=df["cumulative_long_pnl_pct"],  # Already in decimal form for tickformat
             name="Long (%)",
-            line=dict(color='#1f77b4', width=2),  # Blue
+            line=dict(color="#1f77b4", width=2),  # Blue
             visible=False,
-            legendgroup='long',
-            mode='lines'
+            legendgroup="long",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_short_pnl_pct'],  # Already in decimal form for tickformat
+            y=df["cumulative_short_pnl_pct"],  # Already in decimal form for tickformat
             name="Short (%)",
-            line=dict(color='#d62728', width=2),  # Red
+            line=dict(color="#d62728", width=2),  # Red
             visible=False,
-            legendgroup='short',
-            mode='lines'
+            legendgroup="short",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['cumulative_total_pnl_pct'],  # Already in decimal form for tickformat
+            y=df["cumulative_total_pnl_pct"],  # Already in decimal form for tickformat
             name="Total (%)",
-            line=dict(color='#2ca02c', width=2),  # Green
+            line=dict(color="#2ca02c", width=2),  # Green
             visible=False,
-            legendgroup='total',
-            mode='lines'
+            legendgroup="total",
+            mode="lines",
         )
     )
 
@@ -105,36 +110,36 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['long_pnl'],
+            y=df["long_pnl"],
             name="Long Daily (USD)",
-            line=dict(color='#1f77b4', width=2),  # Blue
+            line=dict(color="#1f77b4", width=2),  # Blue
             visible=False,
-            legendgroup='long_daily',
-            mode='lines'
+            legendgroup="long_daily",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['short_pnl'],
+            y=df["short_pnl"],
             name="Short Daily (USD)",
-            line=dict(color='#d62728', width=2),  # Red
+            line=dict(color="#d62728", width=2),  # Red
             visible=False,
-            legendgroup='short_daily',
-            mode='lines'
+            legendgroup="short_daily",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['total_pnl'],
+            y=df["total_pnl"],
             name="Total Daily (USD)",
-            line=dict(color='#2ca02c', width=2),  # Green
+            line=dict(color="#2ca02c", width=2),  # Green
             visible=False,
-            legendgroup='total_daily',
-            mode='lines'
+            legendgroup="total_daily",
+            mode="lines",
         )
     )
 
@@ -143,36 +148,36 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['long_pnl_pct'],
+            y=df["long_pnl_pct"],
             name="Long Daily (%)",
-            line=dict(color='#1f77b4', width=2),  # Blue
+            line=dict(color="#1f77b4", width=2),  # Blue
             visible=False,
-            legendgroup='long_daily',
-            mode='lines'
+            legendgroup="long_daily",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['short_pnl_pct'],
+            y=df["short_pnl_pct"],
             name="Short Daily (%)",
-            line=dict(color='#d62728', width=2),  # Red
+            line=dict(color="#d62728", width=2),  # Red
             visible=False,
-            legendgroup='short_daily',
-            mode='lines'
+            legendgroup="short_daily",
+            mode="lines",
         )
     )
 
     fig.add_trace(
         go.Scatter(
             x=df[date_column],
-            y=df['net_pnl_pct'],
+            y=df["net_pnl_pct"],
             name="Total Daily (%)",
-            line=dict(color='#2ca02c', width=2),  # Green
+            line=dict(color="#2ca02c", width=2),  # Green
             visible=False,
-            legendgroup='total_daily',
-            mode='lines'
+            legendgroup="total_daily",
+            mode="lines",
         )
     )
 
@@ -182,50 +187,110 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
             label="Cumulative USD",
             method="update",
             args=[
-                {"visible": [True, True, True, False, False, False, False, False, False, False, False, False]},
+                {
+                    "visible": [
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                    ]
+                },
                 {
                     "title": dict(text="Cumulative PnL (USD)", x=0.5, xanchor="center"),
                     "yaxis.title.text": "PnL (USD)",
-                    "yaxis.tickformat": ",.2s"
-                }
-            ]
+                    "yaxis.tickformat": ",.2s",
+                },
+            ],
         ),
         dict(
             label="Cumulative %",
             method="update",
             args=[
-                {"visible": [False, False, False, True, True, True, False, False, False, False, False, False]},
+                {
+                    "visible": [
+                        False,
+                        False,
+                        False,
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                    ]
+                },
                 {
                     "title": dict(text="Cumulative PnL (%)", x=0.5, xanchor="center"),
                     "yaxis.title.text": "PnL (%)",
-                    "yaxis.tickformat": ".1%"
-                }
-            ]
+                    "yaxis.tickformat": ".1%",
+                },
+            ],
         ),
         dict(
             label="Daily USD",
             method="update",
             args=[
-                {"visible": [False, False, False, False, False, False, True, True, True, False, False, False]},
+                {
+                    "visible": [
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        True,
+                        True,
+                        False,
+                        False,
+                        False,
+                    ]
+                },
                 {
                     "title": dict(text="Daily PnL (USD)", x=0.5, xanchor="center"),
                     "yaxis.title.text": "PnL (USD)",
-                    "yaxis.tickformat": ",.2s"
-                }
-            ]
+                    "yaxis.tickformat": ",.2s",
+                },
+            ],
         ),
         dict(
             label="Daily %",
             method="update",
             args=[
-                {"visible": [False, False, False, False, False, False, False, False, False, True, True, True]},
+                {
+                    "visible": [
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        False,
+                        True,
+                        True,
+                        True,
+                    ]
+                },
                 {
                     "title": dict(text="Daily PnL (%)", x=0.5, xanchor="center"),
                     "yaxis.title.text": "PnL (%)",
-                    "yaxis.tickformat": ".1%"
-                }
-            ]
-        )
+                    "yaxis.tickformat": ".1%",
+                },
+            ],
+        ),
     ]
 
     # Set up layout
@@ -236,22 +301,22 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
             rangeslider=dict(visible=True),
             type="date",
             showgrid=True,
-            gridcolor='rgba(211, 211, 211, 0.4)',
-            gridwidth=1
+            gridcolor="rgba(211, 211, 211, 0.4)",
+            gridwidth=1,
         ),
         yaxis=dict(
             title="PnL (USD)",
             showgrid=True,
-            gridcolor='rgba(211, 211, 211, 0.4)',
+            gridcolor="rgba(211, 211, 211, 0.4)",
             gridwidth=1,
             zeroline=True,
-            zerolinecolor='rgba(0, 0, 0, 0.2)',
-            zerolinewidth=1
+            zerolinecolor="rgba(0, 0, 0, 0.2)",
+            zerolinewidth=1,
         ),
         height=height,
         hovermode="x unified",
         legend=dict(orientation="v", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        plot_bgcolor='white',
+        plot_bgcolor="white",
         autosize=True,
         margin=dict(l=50, r=25, b=50, t=70, pad=4),
         updatemenus=[
@@ -265,19 +330,19 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
                 xanchor="left",
                 y=1.15,
                 yanchor="top",
-                bordercolor='lightseagreen',
+                bordercolor="lightseagreen",
                 borderwidth=2,
-                bgcolor='mintcream'
+                bgcolor="mintcream",
             )
-        ]
+        ],
     )
 
     if width is not None:
-        layout['width'] = width
+        layout["width"] = width
 
     fig.update_layout(layout)
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(211, 211, 211, 0.4)')
-    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(211, 211, 211, 0.4)')
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor="rgba(211, 211, 211, 0.4)")
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor="rgba(211, 211, 211, 0.4)")
 
     return fig
 

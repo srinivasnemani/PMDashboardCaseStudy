@@ -15,7 +15,8 @@ conn = sqlite3.connect(sqlite_path)
 cursor = conn.cursor()
 
 # Create table if not exists
-cursor.execute("""
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS industry_exposure (
         date TEXT,
         ticker TEXT,
@@ -23,12 +24,13 @@ cursor.execute("""
         exposure REAL,
         PRIMARY KEY (date, ticker, factor)
     )
-""")
+"""
+)
 
 
 # Helper to infer date from filename if needed
 def infer_date_from_filename(filename):
-    digits = ''.join(filter(str.isdigit, os.path.basename(filename)))
+    digits = "".join(filter(str.isdigit, os.path.basename(filename)))
     try:
         return datetime.strptime(digits, "%Y%m%d").date()
     except ValueError:
@@ -50,19 +52,23 @@ for file_path in pkl_files:
             continue
 
         # Get or infer as_of_date
-        as_of_date = data.get('as_of_date', None)
+        as_of_date = data.get("as_of_date", None)
         if as_of_date is None:
             as_of_date = infer_date_from_filename(file_path)
             if as_of_date is None:
-                raise ValueError(f"Missing as_of_date in both data and filename for {file_path}")
+                raise ValueError(
+                    f"Missing as_of_date in both data and filename for {file_path}"
+                )
         else:
             as_of_date = pd.to_datetime(as_of_date).date()
 
         # Reshape and insert
-        df = df.reset_index().melt(id_vars='Ticker', var_name='factor', value_name='exposure')
-        df['date'] = as_of_date
-        df = df[['date', 'Ticker', 'factor', 'exposure']]
-        df.columns = ['date', 'ticker', 'factor', 'exposure']
+        df = df.reset_index().melt(
+            id_vars="Ticker", var_name="factor", value_name="exposure"
+        )
+        df["date"] = as_of_date
+        df = df[["date", "Ticker", "factor", "exposure"]]
+        df.columns = ["date", "ticker", "factor", "exposure"]
 
         # Insert into SQLite (replace on conflict)
         insert_sql = """

@@ -23,11 +23,16 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
     go.Figure: Plotly figure showing risk decomposition
     """
     # Create a subplot figure with 1 row and 2 columns
-    fig = make_subplots(rows=1, cols=2,
-                        specs=[[{"type": "bar"}, {"type": "pie"}]],
-                        column_widths=[0.48, 0.48],
-                        horizontal_spacing=0.08,
-                        subplot_titles=("Risk Decomposition (Annualized Volatility)", "Risk Contribution % (Variance)")
+    fig = make_subplots(
+        rows=1,
+        cols=2,
+        specs=[[{"type": "bar"}, {"type": "pie"}]],
+        column_widths=[0.48, 0.48],
+        horizontal_spacing=0.08,
+        subplot_titles=(
+            "Risk Decomposition (Annualized Volatility)",
+            "Risk Contribution % (Variance)",
+        ),
     )
 
     # Bar Chart (Left) - Annualized Volatility metrics (as %)
@@ -39,12 +44,13 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
             x=["Factor Risk", "Specific Risk", "Total Risk"],
             y=[factor_vol, specific_vol, total_vol],
             text=[f"{factor_vol:.2f}%", f"{specific_vol:.2f}%", f"{total_vol:.2f}%"],
-            textposition='auto',
+            textposition="auto",
             name="Risk (Annualized Vol)",
-            marker_color='#636EFA',
-            showlegend=False
+            marker_color="#636EFA",
+            showlegend=False,
         ),
-        row=1, col=1
+        row=1,
+        col=1,
     )
 
     # Pie Chart (Right) - Risk Contribution % (Volatility)
@@ -56,25 +62,34 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
             values=[factor_contrib, specific_contrib],
             name="Risk Contribution %",
             hole=0.4,
-            marker_colors=['#636EFA', '#EF553B'],
-            textinfo='text',
-            texttemplate='%{value:.2f}%',
+            marker_colors=["#636EFA", "#EF553B"],
+            textinfo="text",
+            texttemplate="%{value:.2f}%",
         ),
-        row=1, col=2
+        row=1,
+        col=2,
     )
 
     # Add borders around bar charts
     fig.add_shape(
         type="rect",
-        x0=0, y0=0, x1=0.48, y1=1,
-        xref="paper", yref="paper",
-        line=dict(color="LightGreen", width=1)
+        x0=0,
+        y0=0,
+        x1=0.48,
+        y1=1,
+        xref="paper",
+        yref="paper",
+        line=dict(color="LightGreen", width=1),
     )
     fig.add_shape(
         type="rect",
-        x0=0.52, y0=0, x1=1, y1=1,
-        xref="paper", yref="paper",
-        line=dict(color="LightGreen", width=1)
+        x0=0.52,
+        y0=0,
+        x1=1,
+        y1=1,
+        xref="paper",
+        yref="paper",
+        line=dict(color="LightGreen", width=1),
     )
 
     # Update layout
@@ -104,7 +119,7 @@ if __name__ == "__main__":
         "Total Risk (Annualized Vol)": [0.446696],
         "Factor Risk Contribution %": [0.880774259],
         "Specific Risk Contribution %": [0.119225741],
-        "Net Exposure Ratio": [0.95]
+        "Net Exposure Ratio": [0.95],
     }
     df = pd.DataFrame(data)
     fig = plot_portfolio_risk_decomposition(df)

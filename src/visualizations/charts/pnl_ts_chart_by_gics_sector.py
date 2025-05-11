@@ -19,59 +19,78 @@ def plot_ts_gics_sector_pnl(grouped_df: pd.DataFrame) -> go.Figure:
     fig = go.Figure()
 
     # Dropdown options
-    metrics = ['cumulative_pnl', 'cumulative_pnl_pct']
-    labels = {'cumulative_pnl': 'Cumulative PnL (USD)', 'cumulative_pnl_pct': 'Cumulative PnL (%)'}
+    metrics = ["cumulative_pnl", "cumulative_pnl_pct"]
+    labels = {
+        "cumulative_pnl": "Cumulative PnL (USD)",
+        "cumulative_pnl_pct": "Cumulative PnL (%)",
+    }
 
     # Add traces for each sector and metric
     for metric in metrics:
-        for sector in grouped_df['gics_sector'].unique():
-            df_sector = grouped_df[grouped_df['gics_sector'] == sector]
-            fig.add_trace(go.Scatter(
-                x=df_sector['trade_open_date'],
-                y=df_sector[metric],
-                mode='lines+markers',
-                name=f'{sector}',
-                visible=(metric == 'cumulative_pnl')  # Default visible metric
-            ))
+        for sector in grouped_df["gics_sector"].unique():
+            df_sector = grouped_df[grouped_df["gics_sector"] == sector]
+            fig.add_trace(
+                go.Scatter(
+                    x=df_sector["trade_open_date"],
+                    y=df_sector[metric],
+                    mode="lines+markers",
+                    name=f"{sector}",
+                    visible=(metric == "cumulative_pnl"),  # Default visible metric
+                )
+            )
 
     # Buttons to switch between metrics
     buttons = []
     for i, metric in enumerate(metrics):
-        visibility = [m == metric for m in metrics for _ in grouped_df['gics_sector'].unique()]
-        if metric == 'cumulative_pnl_pct':
+        visibility = [
+            m == metric for m in metrics for _ in grouped_df["gics_sector"].unique()
+        ]
+        if metric == "cumulative_pnl_pct":
             tickformat = ".1%"
         else:
             tickformat = ",.2s"
-        buttons.append(dict(
-            method='update',
-            label=labels[metric],
-            args=[
-                {'visible': visibility},
-                {
-                    'title': {'text': f'<b>{labels[metric]} by GICS Sector</b>', 'x': 0.5, 'xanchor': 'center'},
-                    'yaxis': {'title': labels[metric], 'tickformat': tickformat}
-                }
-            ]
-        ))
+        buttons.append(
+            dict(
+                method="update",
+                label=labels[metric],
+                args=[
+                    {"visible": visibility},
+                    {
+                        "title": {
+                            "text": f"<b>{labels[metric]} by GICS Sector</b>",
+                            "x": 0.5,
+                            "xanchor": "center",
+                        },
+                        "yaxis": {"title": labels[metric], "tickformat": tickformat},
+                    },
+                ],
+            )
+        )
 
     fig.update_layout(
-        updatemenus=[dict(
-            buttons=buttons,
-            direction='down',
-            showactive=True,
-            x=0,
-            y=1.15,
-            xanchor='left',
-            yanchor='top',
-            bordercolor='lightseagreen',
-            borderwidth=2,
-            bgcolor='mintcream'
-        )],
-        title={'text': '<b>Cumulative PnL (USD) by GICS Sector</b>', 'x': 0.5, 'xanchor': 'center'},
-        xaxis_title='Trade Open Date',
-        yaxis_title='Cumulative PnL (USD)',
-        hovermode='x unified',
-        template='plotly_white'
+        updatemenus=[
+            dict(
+                buttons=buttons,
+                direction="down",
+                showactive=True,
+                x=0,
+                y=1.15,
+                xanchor="left",
+                yanchor="top",
+                bordercolor="lightseagreen",
+                borderwidth=2,
+                bgcolor="mintcream",
+            )
+        ],
+        title={
+            "text": "<b>Cumulative PnL (USD) by GICS Sector</b>",
+            "x": 0.5,
+            "xanchor": "center",
+        },
+        xaxis_title="Trade Open Date",
+        yaxis_title="Cumulative PnL (USD)",
+        hovermode="x unified",
+        template="plotly_white",
     )
 
     return fig

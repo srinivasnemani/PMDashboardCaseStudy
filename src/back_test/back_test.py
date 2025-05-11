@@ -33,8 +33,12 @@ def create_backtest_data(strategy_name, start_date, end_date):
     # Initialize universe specification and fetch required datasets
     univ_spec = UniverseSpec("SP500", start_date, end_date)
     price_history_df = PriceDataFetcher.get_price_data(univ_spec)
-    alpha_scores_df = RebalanceUtil.get_alpha_scores(strategy_name, start_date, end_date)
-    aum_leverage_df = RebalanceUtil.get_aum_leverage_data(strategy_name, start_date, end_date)
+    alpha_scores_df = RebalanceUtil.get_alpha_scores(
+        strategy_name, start_date, end_date
+    )
+    aum_leverage_df = RebalanceUtil.get_aum_leverage_data(
+        strategy_name, start_date, end_date
+    )
 
     # Create and return the BackTestData instance
     return BackTestData(
@@ -44,7 +48,7 @@ def create_backtest_data(strategy_name, start_date, end_date):
         end_date=end_date,
         aum_leverage_df=aum_leverage_df,
         alpha_scores_df=alpha_scores_df,
-        price_history_df=price_history_df
+        price_history_df=price_history_df,
     )
 
 
@@ -70,7 +74,7 @@ class BackTestUtil:
         # Initialize parameters dictionary
         params = {
             "rebalance_date": str(pd.Timestamp(rebalance_date).date()),
-            "strategy_name": strategy_name
+            "strategy_name": strategy_name,
         }
 
         conditions = []
@@ -83,14 +87,18 @@ class BackTestUtil:
         return df
 
     @staticmethod
-    def fill_trade_closing_prices(previous_rebal_trades_df, trade_closing_prices_df, rebalance_date):
+    def fill_trade_closing_prices(
+        previous_rebal_trades_df, trade_closing_prices_df, rebalance_date
+    ):
         rebalance_date_formatted = pd.Timestamp(rebalance_date)
 
-        prev_rebalance_df = previous_rebal_trades_df.merge(trade_closing_prices_df, on='ticker', how='left')
-        prev_rebalance_df['trade_close_price'] = prev_rebalance_df['value']
-        prev_rebalance_df.drop('value', axis=1, inplace=True)
+        prev_rebalance_df = previous_rebal_trades_df.merge(
+            trade_closing_prices_df, on="ticker", how="left"
+        )
+        prev_rebalance_df["trade_close_price"] = prev_rebalance_df["value"]
+        prev_rebalance_df.drop("value", axis=1, inplace=True)
 
-        prev_rebalance_df['trade_close_date'] = rebalance_date_formatted
+        prev_rebalance_df["trade_close_date"] = rebalance_date_formatted
         return prev_rebalance_df
 
 
@@ -111,37 +119,65 @@ class BackTest:
             print(" No Alpha scores for this strategy and for given dates.")
             return
 
-        unique_dates = np.sort(alpha_scores_df['date'].unique())
+        unique_dates = np.sort(alpha_scores_df["date"].unique())
         initial_rebalance_date = unique_dates[0]
 
         for rebalance_date in unique_dates:
             print(rebalance_date)
-            if pd.to_datetime(rebalance_date).date() == pd.to_datetime("2024-11-22").date():
+            if (
+                pd.to_datetime(rebalance_date).date()
+                == pd.to_datetime("2024-11-22").date()
+            ):
                 print(rebalance_date)
 
-            prev_rebalance_trade_data = BackTestUtil.get_previous_rebalance_data(strategy_name, rebalance_date)
-            prev_rebalance_tickers = np.unique(prev_rebalance_trade_data['ticker'])
-            current_rebalance_alpha_scores_df = alpha_scores_df[alpha_scores_df['date'] == rebalance_date]
-            current_rebalance_tickers = np.unique(current_rebalance_alpha_scores_df['ticker'])
+            prev_rebalance_trade_data = BackTestUtil.get_previous_rebalance_data(
+                strategy_name, rebalance_date
+            )
+            prev_rebalance_tickers = np.unique(prev_rebalance_trade_data["ticker"])
+            current_rebalance_alpha_scores_df = alpha_scores_df[
+                alpha_scores_df["date"] == rebalance_date
+            ]
+            current_rebalance_tickers = np.unique(
+                current_rebalance_alpha_scores_df["ticker"]
+            )
 
-            prev_rebalance_closing_prices = price_history[price_history['date'].isin([rebalance_date]) &
-                                                          price_history['ticker'].isin(prev_rebalance_tickers)]
-            new_rebalance_opening_prices = price_history[price_history['date'].isin([rebalance_date]) &
-                                                         price_history['ticker'].isin(current_rebalance_tickers)]
+            prev_rebalance_closing_prices = price_history[
+                price_history["date"].isin([rebalance_date])
+                & price_history["ticker"].isin(prev_rebalance_tickers)
+            ]
+            new_rebalance_opening_prices = price_history[
+                price_history["date"].isin([rebalance_date])
+                & price_history["ticker"].isin(current_rebalance_tickers)
+            ]
 
-            closed_trades_df = BackTestUtil.fill_trade_closing_prices(prev_rebalance_trade_data,
-                                                                      prev_rebalance_closing_prices, rebalance_date)
+            closed_trades_df = BackTestUtil.fill_trade_closing_prices(
+                prev_rebalance_trade_data, prev_rebalance_closing_prices, rebalance_date
+            )
             closing_value_prev_rebal = np.nansum(
-                (closed_trades_df['trade_close_price'] * abs(closed_trades_df['shares'])))
+                (
+                    closed_trades_df["trade_close_price"]
+                    * abs(closed_trades_df["shares"])
+                )
+            )
 
-            new_notional = RebalanceUtil.get_new_portfolio_notional(aum_leverage_df, rebalance_date,
-                                                                    closing_value_prev_rebal,
-                                                                    initial_rebalance_date == rebalance_date)
+            new_notional = RebalanceUtil.get_new_portfolio_notional(
+                aum_leverage_df,
+                rebalance_date,
+                closing_value_prev_rebal,
+                initial_rebalance_date == rebalance_date,
+            )
 
-            alpha_scores_current_rebalance_df = alpha_scores_df[alpha_scores_df['date'] == rebalance_date]
+            alpha_scores_current_rebalance_df = alpha_scores_df[
+                alpha_scores_df["date"] == rebalance_date
+            ]
 
-            rebalance_data = create_rebalance_data(strategy_name, rebalance_date, alpha_scores_current_rebalance_df,
-                                                   new_rebalance_opening_prices, new_notional)
+            rebalance_data = create_rebalance_data(
+                strategy_name,
+                rebalance_date,
+                alpha_scores_current_rebalance_df,
+                new_rebalance_opening_prices,
+                new_notional,
+            )
 
             rb = RebalancePortfolio(rebalance_data)
             new_portfolio = rb.rebalance_portfolio()
@@ -150,11 +186,14 @@ class BackTest:
             update_trades(new_portfolio)
         else:
             # Close the last rebalance trades (as its back test it can't have opened trades).
-            prev_rebalance_closing_prices = price_history[price_history['date'].isin([rebalance_date]) &
-                                                          price_history['ticker'].isin(current_rebalance_tickers)]
-            closed_trades_df = BackTestUtil.fill_trade_closing_prices(new_portfolio,
-                                                                      prev_rebalance_closing_prices, rebalance_date)
-            closed_trades_df['trade_close_date'] = rebalance_date
+            prev_rebalance_closing_prices = price_history[
+                price_history["date"].isin([rebalance_date])
+                & price_history["ticker"].isin(current_rebalance_tickers)
+            ]
+            closed_trades_df = BackTestUtil.fill_trade_closing_prices(
+                new_portfolio, prev_rebalance_closing_prices, rebalance_date
+            )
+            closed_trades_df["trade_close_date"] = rebalance_date
             update_trades(closed_trades_df)
 
 

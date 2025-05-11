@@ -4,42 +4,31 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from src.strategy.momentum.roc_momentum import (RocSignal, RoCSignalData,
-                                                UniverseSpec)
+from src.strategy.momentum.roc_momentum import RocSignal, RoCSignalData, UniverseSpec
 
 
 @pytest.fixture
 def mock_price_data():
     # Create mock price data for testing with more realistic values
     # Extend the date range to ensure we have enough data for RoC calculation
-    dates = pd.date_range(start='2022-12-01', end='2023-02-28', freq='B')  # Extended date range
-    tickers = ['AAPL', 'MSFT', 'GOOGL']
+    dates = pd.date_range(
+        start="2022-12-01", end="2023-02-28", freq="B"
+    )  # Extended date range
+    tickers = ["AAPL", "MSFT", "GOOGL"]
     data = []
 
     # Create a base price for each ticker
-    base_prices = {
-        'AAPL': 150.0,
-        'MSFT': 250.0,
-        'GOOGL': 100.0
-    }
+    base_prices = {"AAPL": 150.0, "MSFT": 250.0, "GOOGL": 100.0}
 
     # Create a trend for each ticker
-    trends = {
-        'AAPL': 0.005,
-        'MSFT': 0.008,
-        'GOOGL': -0.006
-    }
+    trends = {"AAPL": 0.005, "MSFT": 0.008, "GOOGL": -0.006}
 
     for i, date in enumerate(dates):
         for ticker in tickers:
             trend_factor = 1 + (trends[ticker] * i)
             random_factor = 1 + np.random.normal(0, 0.02)
             price = base_prices[ticker] * trend_factor * random_factor
-            data.append({
-                'date': date,
-                'ticker': ticker,
-                'value': price
-            })
+            data.append({"date": date, "ticker": ticker, "value": price})
 
     return pd.DataFrame(data)
 
@@ -47,15 +36,17 @@ def mock_price_data():
 @pytest.fixture
 def universe_spec():
     return UniverseSpec(
-        universe='sp500',
-        start_date='2022-12-01',
-        end_date='2023-02-28'  # Updated to match mock data
+        universe="sp500",
+        start_date="2022-12-01",
+        end_date="2023-02-28",  # Updated to match mock data
     )
 
 
 def test_roc_signal_initialization(universe_spec, mock_price_data):
     """Test that RocSignal initializes correctly with valid UniverseSpec"""
-    with patch('src.data_access.prices.PriceDataFetcher.get_price_data') as mock_get_price_data:
+    with patch(
+        "src.data_access.prices.PriceDataFetcher.get_price_data"
+    ) as mock_get_price_data:
         mock_get_price_data.return_value = mock_price_data
         signal = RocSignal(universe_spec)
         assert signal.spec == universe_spec
@@ -64,7 +55,9 @@ def test_roc_signal_initialization(universe_spec, mock_price_data):
 
 def test_calculate_signal_scores(universe_spec, mock_price_data):
     """Test the calculate_signal_scores function with mock data"""
-    with patch('src.data_access.prices.PriceDataFetcher.get_price_data') as mock_get_price_data:
+    with patch(
+        "src.data_access.prices.PriceDataFetcher.get_price_data"
+    ) as mock_get_price_data:
         mock_get_price_data.return_value = mock_price_data
         signal = RocSignal(universe_spec)
         roc_diff = signal.calculate_signal_scores()
@@ -73,14 +66,16 @@ def test_calculate_signal_scores(universe_spec, mock_price_data):
         assert isinstance(roc_diff, pd.DataFrame)
 
         # Verify the output has the expected columns
-        expected_columns = sorted(mock_price_data['ticker'].unique())
+        expected_columns = sorted(mock_price_data["ticker"].unique())
         assert all(col in roc_diff.columns for col in expected_columns)
 
         # Verify the index is datetime
         assert isinstance(roc_diff.index, pd.DatetimeIndex)
 
         # Verify the values are numeric
-        assert roc_diff.select_dtypes(include=[np.number]).shape[1] == len(expected_columns)
+        assert roc_diff.select_dtypes(include=[np.number]).shape[1] == len(
+            expected_columns
+        )
 
         # Verify that after the initial NaN period, there are no NaN values
         # The first 3 weeks will have NaN values due to the 3-week RoC calculation

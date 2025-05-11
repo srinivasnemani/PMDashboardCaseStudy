@@ -14,8 +14,8 @@ DEFAULT_RISK_FREE_RATE = 0.02
 def get_bm_data():
     univ_spec = UniverseSpec("SP500", "2024-01-01", "2024-12-31")
     bm_data = PriceDataFetcher.get_benchmark_data(univ_spec)
-    bm_data = bm_data.sort_values('date')
-    bm_data['benchmark_returns'] = bm_data['value'].pct_change()
+    bm_data = bm_data.sort_values("date")
+    bm_data["benchmark_returns"] = bm_data["value"].pct_change()
     return bm_data
 
 
@@ -29,43 +29,47 @@ def get_backtest_data(strategy_name, trade_direction, start_date, end_date):
     back_test_data = DataAccessUtil.fetch_data_from_db(query_string)
 
     if trade_direction.capitalize() == "Long":
-        back_test_data = back_test_data[back_test_data['direction'] == "Long"]
+        back_test_data = back_test_data[back_test_data["direction"] == "Long"]
     elif trade_direction.capitalize() == "Short":
-        back_test_data = back_test_data[back_test_data['direction'] == "Short"]
+        back_test_data = back_test_data[back_test_data["direction"] == "Short"]
 
     back_test_returns = get_pnl_time_series_from_trade_data(back_test_data)
-    back_test_returns['trade_open_date'] = pd.to_datetime(back_test_returns['trade_open_date'])
-    back_test_returns = back_test_returns.rename(columns={'trade_pnl_pct': 'portfolio_returns'})
-    back_test_returns = back_test_returns.rename(columns={'trade_open_date': 'date'})
+    back_test_returns["trade_open_date"] = pd.to_datetime(
+        back_test_returns["trade_open_date"]
+    )
+    back_test_returns = back_test_returns.rename(
+        columns={"trade_pnl_pct": "portfolio_returns"}
+    )
+    back_test_returns = back_test_returns.rename(columns={"trade_open_date": "date"})
 
     return back_test_returns
 
 
 def align_pf_bm_data(trade_pnl_df, bm_data):
-    combined_df = pd.merge(trade_pnl_df, bm_data, on='date', how='left')
-    selected_columns = ['date', 'portfolio_returns', 'benchmark_returns']
+    combined_df = pd.merge(trade_pnl_df, bm_data, on="date", how="left")
+    selected_columns = ["date", "portfolio_returns", "benchmark_returns"]
     combined_df = combined_df[selected_columns]
     return combined_df
 
 
 def append_risk_free_rate(df, risk_free_rate=DEFAULT_RISK_FREE_RATE):
     # Sort dates to ensure proper calculation
-    df = df.sort_values('date')
+    df = df.sort_values("date")
 
     # Calculate most common difference between dates
-    diff = df['date'].diff().mode()[0]
+    diff = df["date"].diff().mode()[0]
 
     if diff.days == 1:
-        frequency = 'D'
+        frequency = "D"
         days_per_period = 1
     elif diff.days == 7:
-        frequency = 'W'
+        frequency = "W"
         days_per_period = 7
     elif 28 <= diff.days <= 31:
-        frequency = 'M'
+        frequency = "M"
         days_per_period = 30
     else:
-        frequency = f'{diff.days}D'
+        frequency = f"{diff.days}D"
         days_per_period = diff.days
 
     # Convert annual risk-free rate to the appropriate frequency
@@ -73,18 +77,21 @@ def append_risk_free_rate(df, risk_free_rate=DEFAULT_RISK_FREE_RATE):
     risk_free_period_rate = (1 + risk_free_rate) ** (days_per_period / 365) - 1
 
     # Create a new column with the risk-free rate adjusted for frequency
-    df['risk_free_rate'] = risk_free_period_rate
+    df["risk_free_rate"] = risk_free_period_rate
 
     return df
 
 
-def create_back_test_summary(strategy_name, start_date=None, end_date=None, trade_direction="all"):
+def create_back_test_summary(
+    strategy_name, start_date=None, end_date=None, trade_direction="all"
+):
     benchmark_data = get_bm_data()
-    portfolio_data = get_backtest_data(strategy_name, trade_direction, start_date, end_date)
-
+    portfolio_data = get_backtest_data(
+        strategy_name, trade_direction, start_date, end_date
+    )
 
     combined = align_pf_bm_data(portfolio_data, benchmark_data)
-    combined = combined.sort_values(['date'])
+    combined = combined.sort_values(["date"])
     bm_pf_rf_df = append_risk_free_rate(combined)
     back_test_data = BackTestSummaryAnalyticsData(bm_pf_rf_df)
 

@@ -1,10 +1,23 @@
 import streamlit as st
 
+# =============================================================================
+# Alpha Factor Attributions (To-Do)
+# This page will provide analytics and visualizations for alpha factor attributions:
+# - Brinson attributions (Allocation, Selection, Interaction effects)
+# - Factor exposure, performance, and drawdown analysis
+# - Attribution waterfall, style drift, and factor decay charts
+# - Interactive filters for portfolio date, strategy, trade direction, sector, and region
+# =============================================================================
+
 st.set_page_config(layout="wide")
+st.markdown(
+    "<h2 style='text-align: center;'>Alpha Factor Attributions (To-Do)</h2>",
+    unsafe_allow_html=True,
+)
 
 if __name__ == "__main__":
     st.markdown(
-        '''
+        """
         <div style="font-size:18px;">
         <br> Following visualizations/analytics can be added as part performance attribution. <br><br>
         
@@ -33,4 +46,6 @@ if __name__ == "__main__":
             <li>&#10148; Region/Country selections</li>
         </ul>
         </div>
-        ''', unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )

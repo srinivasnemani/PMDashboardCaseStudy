@@ -13,12 +13,15 @@ SQLLITE_DB_PATH = Path(__file__).parent.parent.parent / "dbs" / "sp500_data.db"
 # SQLLITE_DB_PATH = Path(r"C:\CaseStudy\dbs\sp500_data_2test.db")
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 class TableNames(Enum):
     """Enum for database table names"""
+
     TS_DATA = "sp500_ts_data"
     ALPHA_SCORES = "alpha_history"
     TRADE_BOOKING = "trade_booking"
@@ -26,7 +29,6 @@ class TableNames(Enum):
     RISK_FACTOR_COVARIANCE = "factor_covariance"
     RISK_FACTOR_EXPOSURES = "factor_exposures"
     RISK_SPRISK_RESIDUALS = "sprisk_residuals"
-
 
 
 class DatabaseManager:
@@ -135,14 +137,14 @@ class DatabaseManager:
 
             # Define columns
             columns = {
-                'strategy': String,
-                'trade_open_date': Date,
-                'ticker': String,
-                'shares': Integer,
-                'trade_open_price': Float,
-                'direction': String,
-                'trade_close_date': Date,
-                'trade_close_price': Float
+                "strategy": String,
+                "trade_open_date": Date,
+                "ticker": String,
+                "shares": Integer,
+                "trade_open_price": Float,
+                "direction": String,
+                "trade_close_date": Date,
+                "trade_close_price": Float,
             }
 
             return self.create_table(table_name, columns)
@@ -163,10 +165,10 @@ class DatabaseManager:
 
             # Define columns
             columns = {
-                'date': String,
-                'strategy_name': String,
-                'aum': Float,
-                'target_leverage': Float
+                "date": String,
+                "strategy_name": String,
+                "aum": Float,
+                "target_leverage": Float,
             }
 
             return self.create_table(table_name, columns)
@@ -198,4 +200,3 @@ if __name__ == "__main__":
     success_flag = db_manager.create_aum_leverage_table()
 
     print(f"Alpha table created: {success_flag}")
-

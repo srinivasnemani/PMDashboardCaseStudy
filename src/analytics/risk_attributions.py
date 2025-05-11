@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 import numpy as np
 import pandas as pd
-
+from sklearn.linear_model import LinearRegression
 from src.data_access.risk_model import RiskModelDataUtil
 from src.data_access.trade_booking import get_trade_and_sec_master_data
 
@@ -21,7 +21,12 @@ class RiskFactorAttributions:
         Filter trades by direction ('Long' or 'Short'). Default is None (all trades).
     """
 
-    def __init__(self, trade_data_df: pd.DataFrame, rm_obj: Any, trade_direction: Optional[str] = None) -> None:
+    def __init__(
+            self,
+            trade_data_df: pd.DataFrame,
+            rm_obj: Any,
+            trade_direction: Optional[str] = None,
+    ) -> None:
         self.trade_data_df = trade_data_df
         self.rm_obj = rm_obj
         self.trade_direction = trade_direction
@@ -31,9 +36,6 @@ class RiskFactorAttributions:
         Calculate factor PnL attribution for the portfolio, adjusted for long-short trades.
         Signed factor exposures are normalized over gross exposure.
         """
-        import numpy as np
-        import pandas as pd
-        from sklearn.linear_model import LinearRegression
 
         trade_data = self.trade_data_df
         risk_obj = self.rm_obj
@@ -52,24 +54,27 @@ class RiskFactorAttributions:
 
         # Step 2: Compute position weights and PnL
         trade_data_selected["gross_position_weight"] = (
-                trade_data_selected["shares"].abs() * trade_data_selected["trade_close_price"]
+                trade_data_selected["shares"].abs()
+                * trade_data_selected["trade_close_price"]
         )
-        trade_data_selected["position_weight"] = trade_data_selected["gross_position_weight"]
+        trade_data_selected["position_weight"] = trade_data_selected[
+            "gross_position_weight"
+        ]
 
         trade_data_selected["pnl"] = trade_data_selected["shares"] * (
-                trade_data_selected["trade_close_price"] - trade_data_selected["trade_open_price"]
+                trade_data_selected["trade_close_price"]
+                - trade_data_selected["trade_open_price"]
         )
 
         # Step 3: Align and merge factor exposures
-        trade_data_selected = trade_data_selected.rename(columns={"trade_open_date": "date"})
+        trade_data_selected = trade_data_selected.rename(
+            columns={"trade_open_date": "date"}
+        )
         trade_data_selected["date"] = pd.to_datetime(trade_data_selected["date"])
         factor_exposures["date"] = pd.to_datetime(factor_exposures["date"])
 
         merged = pd.merge(
-            trade_data_selected,
-            factor_exposures,
-            on=["date", "ticker"],
-            how="left"
+            trade_data_selected, factor_exposures, on=["date", "ticker"], how="left"
         )
 
         # Step 4: Prepare regression inputs
@@ -91,29 +96,35 @@ class RiskFactorAttributions:
         residual_pnl_total = merged["residual_pnl"].sum()
 
         # Step 8: Attribution table
-        attribution = pd.DataFrame({
-            "factor_pnl": factor_pnl,
-            "exposure": factor_exposure_sums
-        })
+        attribution = pd.DataFrame(
+            {"factor_pnl": factor_pnl, "exposure": factor_exposure_sums}
+        )
 
         # Signed exposure normalized by gross exposure
-        gross_exposure = attribution["exposure"].abs().sum()
+        gross_exposure = attribution["exposure"].sum()
         attribution["factor_exposure_pct"] = attribution["exposure"] / gross_exposure
-        attribution["pnl_contribution_pct"] = attribution["factor_pnl"] / y.sum()
+        attribution["pnl_contribution_pct"] = attribution["factor_pnl"] / factor_pnl.abs().sum()
 
         # Step 9: Add residual row
-        residual_row = pd.Series({
-            "factor_pnl": residual_pnl_total,
-            "exposure": np.nan,
-            "factor_exposure_pct": np.nan,
-            "pnl_contribution_pct": residual_pnl_total / y.sum(),
-        }, name="Residual")
+        residual_row = pd.Series(
+            {
+                "factor_pnl": residual_pnl_total,
+                "exposure": np.nan,
+                "factor_exposure_pct": np.nan,
+                "pnl_contribution_pct": residual_pnl_total / y.sum(),
+            },
+            name="Residual",
+        )
 
         attribution = pd.concat([attribution, residual_row.to_frame().T])
 
         # Final formatting
         attribution = attribution.rename(columns={"factor_pnl": "factor_pnl_usd"})
-        selected_columns = ["factor_pnl_usd", "factor_exposure_pct", "pnl_contribution_pct"]
+        selected_columns = [
+            "factor_pnl_usd",
+            "factor_exposure_pct",
+            "pnl_contribution_pct",
+        ]
         attribution = attribution[selected_columns]
         attribution = attribution.sort_values("pnl_contribution_pct", ascending=False)
 
@@ -155,7 +166,9 @@ class RiskFactorAttributions:
         merged_df = pd.merge(trade_df, risk_df, on="ticker", how="inner")
 
         # Calculate signed market values (preserving short position negative signs)
-        merged_df["signed_market_value"] = merged_df["shares"] * merged_df["trade_open_price"]
+        merged_df["signed_market_value"] = (
+                merged_df["shares"] * merged_df["trade_open_price"]
+        )
 
         # Calculate absolute market values for normalization
         merged_df["abs_market_value"] = abs(merged_df["signed_market_value"])
@@ -212,21 +225,17 @@ class RiskFactorAttributions:
         # Risk contributions
         risk_decomposition = pd.DataFrame(
             {
-
                 # Annualized variance metrics
                 "Factor Risk (Annualized Variance)": [factor_risk_annual],
                 "Specific Risk (Annualized Variance)": [specific_risk_annual],
                 "Total Risk (Annualized Variance)": [total_risk_annual],
-
                 # Annualized volatility metrics
                 "Factor Risk (Annualized Vol)": [factor_volatility_annual],
                 "Specific Risk (Annualized Vol)": [specific_volatility_annual],
                 "Total Risk (Annualized Vol)": [total_volatility_annual],
-
                 # Contribution percentages (unchanged)
                 "Factor Risk Contribution %": [factor_risk / total_risk],
                 "Specific Risk Contribution %": [specific_risk / total_risk],
-
             }
         )
 
@@ -270,7 +279,9 @@ class RiskFactorAttributions:
         merged_df = pd.merge(trade_df, risk_df, on="ticker", how="inner")
 
         # Calculate signed market values (preserving short position negative signs)
-        merged_df["signed_market_value"] = merged_df["shares"] * merged_df["trade_open_price"]
+        merged_df["signed_market_value"] = (
+                merged_df["shares"] * merged_df["trade_open_price"]
+        )
 
         # Calculate absolute market values for normalization
         merged_df["abs_market_value"] = abs(merged_df["signed_market_value"])
@@ -308,11 +319,12 @@ class RiskFactorAttributions:
 
         # Marginal contribution to risk
         # Use safe division to avoid issues when factor_risk is very small
-        safe_factor_risk = max(factor_risk, 1e-10)  # Prevent division by very small numbers
+        safe_factor_risk = max(
+            factor_risk, 1e-10
+        )  # Prevent division by very small numbers
         marginal_contribution = (
-                (factor_cov_matrix @ portfolio_factor_exposure).flatten()
-                / np.sqrt(safe_factor_risk)
-        )
+                                        factor_cov_matrix @ portfolio_factor_exposure
+                                ).flatten() / np.sqrt(safe_factor_risk)
 
         # Factor risk contribution
         factor_risk_contribution = (
@@ -349,7 +361,9 @@ class RiskFactorAttributions:
         total_abs_contribution = absolute_contributions.sum()
 
         # Store the contribution percentage (will sum to 100%)
-        risk_decomposition["Contribution %"] = absolute_contributions / total_abs_contribution * 100
+        risk_decomposition["Contribution %"] = (
+                absolute_contributions / total_abs_contribution * 100
+        )
 
         # Add total row
         total_row = pd.Series(
@@ -395,9 +409,11 @@ def demo_run() -> None:
     Demo function to run the risk factor attributions.
     """
     # Example usage
-    valuation_date = "2024-11-22"
-    strategy_name = "Mom_RoC"  # "MinVol"
-    trade_data = get_trade_and_sec_master_data(strategy_name, valuation_date, valuation_date)
+    valuation_date = "2024-12-27"
+    strategy_name = "MinVol"  # "MinVol"
+    trade_data = get_trade_and_sec_master_data(
+        strategy_name, valuation_date, valuation_date
+    )
     risk_model = RiskModelDataUtil.fetch_risk_model(valuation_date)
     risk_attributions = RiskFactorAttributions(trade_data, risk_model)
     results = risk_attributions.compute_all_factor_attributions()

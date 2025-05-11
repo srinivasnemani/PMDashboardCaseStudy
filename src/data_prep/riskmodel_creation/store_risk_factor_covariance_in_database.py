@@ -15,7 +15,8 @@ conn = sqlite3.connect(sqlite_path)
 cursor = conn.cursor()
 
 # Create table if it doesn't exist
-cursor.execute("""
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS factor_covariance (
         date TEXT,
         factor_1 TEXT,
@@ -23,15 +24,18 @@ cursor.execute("""
         covariance REAL,
         PRIMARY KEY (date, factor_1, factor_2)
     )
-""")
+"""
+)
+
 
 # Helper to extract date from filename (optional fallback)
 def infer_date_from_filename(filename):
-    digits = ''.join(filter(str.isdigit, os.path.basename(filename)))
+    digits = "".join(filter(str.isdigit, os.path.basename(filename)))
     try:
         return datetime.strptime(digits, "%Y%m%d").date()
     except ValueError:
         return None
+
 
 # Loop over all .pkl files
 pkl_files = glob.glob(os.path.join(folder_path, "*.pkl"))
@@ -56,11 +60,16 @@ for file_path in pkl_files:
             as_of_date = pd.to_datetime(as_of_date).date()
 
         # Convert wide matrix to long format
-        cov_long = cov_df.reset_index().melt(id_vars=cov_df.index.name or 'index',
-                                             var_name='factor_2', value_name='covariance')
-        cov_long.rename(columns={cov_df.index.name or 'index': 'factor_1'}, inplace=True)
-        cov_long['date'] = as_of_date
-        cov_long = cov_long[['date', 'factor_1', 'factor_2', 'covariance']]
+        cov_long = cov_df.reset_index().melt(
+            id_vars=cov_df.index.name or "index",
+            var_name="factor_2",
+            value_name="covariance",
+        )
+        cov_long.rename(
+            columns={cov_df.index.name or "index": "factor_1"}, inplace=True
+        )
+        cov_long["date"] = as_of_date
+        cov_long = cov_long[["date", "factor_1", "factor_2", "covariance"]]
 
         # Insert into SQLite DB
         insert_sql = """

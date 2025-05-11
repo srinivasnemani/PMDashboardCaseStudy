@@ -87,7 +87,14 @@ def test_compute_portfolio_risk_decomposition(risk_attributions):
     assert "Factor Risk Contribution %" in result.columns
     assert "Specific Risk Contribution %" in result.columns
     # The sum of contributions should be close to 1.0
-    assert abs(result["Factor Risk Contribution %"].iloc[0] + result["Specific Risk Contribution %"].iloc[0] - 1.0) < 1e-10
+    assert (
+        abs(
+            result["Factor Risk Contribution %"].iloc[0]
+            + result["Specific Risk Contribution %"].iloc[0]
+            - 1.0
+        )
+        < 1e-10
+    )
 
     # Test case 2: Risk decomposition with filtered trades
     trade_data = create_sample_trade_data()
@@ -106,7 +113,14 @@ def test_compute_portfolio_risk_decomposition(risk_attributions):
     assert "Total Risk (Annualized Vol)" in result_filtered.columns
     assert "Factor Risk Contribution %" in result_filtered.columns
     assert "Specific Risk Contribution %" in result_filtered.columns
-    assert abs(result_filtered["Factor Risk Contribution %"].iloc[0] + result_filtered["Specific Risk Contribution %"].iloc[0] - 1.0) < 1e-10
+    assert (
+        abs(
+            result_filtered["Factor Risk Contribution %"].iloc[0]
+            + result_filtered["Specific Risk Contribution %"].iloc[0]
+            - 1.0
+        )
+        < 1e-10
+    )
 
 
 def test_compute_full_risk_decomposition(risk_attributions):
@@ -119,7 +133,12 @@ def test_compute_full_risk_decomposition(risk_attributions):
     assert "Contribution %" in result.columns
     # Contribution % should sum to 100 (with a small tolerance for floating point error)
     # Exclude the "Total" row when checking the sum
-    assert math.isclose(result[result["Factor"] != "Total"]["Contribution %"].sum(), 100.0, rel_tol=1e-4, abs_tol=1e-4)
+    assert math.isclose(
+        result[result["Factor"] != "Total"]["Contribution %"].sum(),
+        100.0,
+        rel_tol=1e-4,
+        abs_tol=1e-4,
+    )
 
     # Test case 2: Full risk decomposition with specific risk
     trade_data = create_sample_trade_data()

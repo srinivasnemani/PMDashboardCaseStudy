@@ -23,13 +23,16 @@ def create_security_ts_table(db_file: str, table_name: str):
 def transform_csv_to_long_format(csv_file: str, key: str) -> pd.DataFrame:
     df = pd.read_csv(csv_file, index_col=0, parse_dates=True)
     df.index.name = "date"
-    long_df = df.reset_index().melt(id_vars=["date"], var_name="ticker", value_name="value")
+    long_df = df.reset_index().melt(
+        id_vars=["date"], var_name="ticker", value_name="value"
+    )
     long_df["key"] = key
     return long_df[["date", "ticker", "key", "value"]]
 
 
-
-def store_dataframe_in_db(df: pd.DataFrame, db_file: str, table_name: str, mode: str = "replace"):
+def store_dataframe_in_db(
+    df: pd.DataFrame, db_file: str, table_name: str, mode: str = "replace"
+):
     with sqlite3.connect(db_file) as conn:
         df.to_sql(table_name, conn, if_exists=mode, index=False)
 

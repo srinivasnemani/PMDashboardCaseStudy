@@ -8,7 +8,9 @@ from src.data_access.schemas import UniverseSpec
 from src.data_access.sqllite_db_manager import TableNames, get_db_engine
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -31,9 +33,7 @@ class PriceDataFetcher:
             engine = get_db_engine()
 
         return PriceDataFetcher._fetch_data(
-            spec=spec,
-            engine=engine,
-            ticker_condition="ticker NOT IN ('SP500')"
+            spec=spec, engine=engine, ticker_condition="ticker NOT IN ('SP500')"
         )
 
     @staticmethod
@@ -52,9 +52,7 @@ class PriceDataFetcher:
             engine = get_db_engine()
 
         return PriceDataFetcher._fetch_data(
-            spec=spec,
-            engine=engine,
-            ticker_condition="ticker IN ('SP500')"
+            spec=spec, engine=engine, ticker_condition="ticker IN ('SP500')"
         )
 
     @staticmethod
@@ -125,9 +123,7 @@ class PriceDataFetcher:
         """
 
         # Initialize parameters dictionary (only for query_date)
-        params = {
-            "query_date": pd.Timestamp(query_date).date().isoformat()
-        }
+        params = {"query_date": pd.Timestamp(query_date).date().isoformat()}
 
         # No additional conditions for this specific use case
         conditions = []
@@ -150,12 +146,13 @@ class PriceDataFetcher:
 
         # Log information about the result
         if not df_prices.empty:
-            logger.info(f"Retrieved prices for {len(df_prices)} tickers on {query_date}")
+            logger.info(
+                f"Retrieved prices for {len(df_prices)} tickers on {query_date}"
+            )
         else:
             logger.warning(f"No price data found for tickers on {query_date}")
 
         return df_prices
-
 
 
 if __name__ == "__main__":
@@ -163,7 +160,7 @@ if __name__ == "__main__":
 
     # Using the static methods directly
     price_df = PriceDataFetcher.get_price_data(spec)
-    print(price_df['date'].unique())
+    print(price_df["date"].unique())
 
     benchmark_df = PriceDataFetcher.get_benchmark_data(spec)
     print(f"Benchmark tickers: {benchmark_df['ticker'].unique()}")

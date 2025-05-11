@@ -42,33 +42,45 @@ class RiskModelUtils:
     @staticmethod
     def get_fridays_between_dates(start_date, end_date):
         # Expects start and  end date in the format "YYYY-MM-DD"
-        return pd.date_range(start=start_date, end=end_date, freq="W-FRI").strftime('%Y-%m-%d').tolist()
+        return (
+            pd.date_range(start=start_date, end=end_date, freq="W-FRI")
+            .strftime("%Y-%m-%d")
+            .tolist()
+        )
 
 
 class RiskModelDataFetcher:
     @staticmethod
     def fetch_ff12_industries(start_date, end_date):
         from pandas_datareader.famafrench import FamaFrenchReader
+
         print("Fetching Fama-French 12 industry portfolios...")
-        ff = FamaFrenchReader('12_Industry_Portfolios_daily', start=start_date, end=end_date)
+        ff = FamaFrenchReader(
+            "12_Industry_Portfolios_daily", start=start_date, end=end_date
+        )
         df = ff.read()[0] / 100
-        df.index = df.index.to_timestamp() if hasattr(df.index, 'to_timestamp') else df.index
+        df.index = (
+            df.index.to_timestamp() if hasattr(df.index, "to_timestamp") else df.index
+        )
         return df
 
     @staticmethod
     def fetch_sp500_returns(start_date, end_date):
         import yfinance as yf
+
         print("Fetching S&P 500 stock list...")
-        sp500_table = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]
-        tickers = [t.replace('.', '-') for t in sp500_table['Symbol'].tolist()]
+        sp500_table = pd.read_html(
+            "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        )[0]
+        tickers = [t.replace(".", "-") for t in sp500_table["Symbol"].tolist()]
 
         all_data = pd.DataFrame()
         for i in range(0, len(tickers), 50):
             time.sleep(5)
-            batch = tickers[i:i + 50]
+            batch = tickers[i : i + 50]
             try:
                 print(f"Fetching batch {i // 50 + 1}/{(len(tickers) // 50) + 1}")
-                data = yf.download(batch, start=start_date, end=end_date)['Close']
+                data = yf.download(batch, start=start_date, end=end_date)["Close"]
                 all_data = pd.concat([all_data, data], axis=1)
             except Exception as e:
                 print(f"Error fetching batch: {e}")
@@ -88,13 +100,13 @@ class IndustryFactorRiskModel:
 
     def serialize_risk_model(self, filepath):
         data_dict = {
-            'as_of_date': self.as_of_date,
-            'stock_returns': self.stock_returns,
-            'industry_factors': self.industry_factors,
-            'industry_exposures': self.industry_exposures,
-            'specific_risk': self.specific_risk,
-            'residuals': self.residuals,
-            'factor_covariance': self.factor_covariance,
+            "as_of_date": self.as_of_date,
+            "stock_returns": self.stock_returns,
+            "industry_factors": self.industry_factors,
+            "industry_exposures": self.industry_exposures,
+            "specific_risk": self.specific_risk,
+            "residuals": self.residuals,
+            "factor_covariance": self.factor_covariance,
         }
         RiskModelUtils.save_as_pickle(data_dict, filepath)
 
@@ -104,16 +116,22 @@ class IndustryFactorRiskModel:
 
     def load_data(self, stock_returns, industry_factors, window_days=252):
         start_date = self.as_of_date - pd.Timedelta(days=window_days + 30)
-        self.stock_returns = stock_returns.loc[start_date:self.as_of_date]
-        self.industry_factors = industry_factors.loc[start_date:self.as_of_date]
-        common_dates = self.stock_returns.index.intersection(self.industry_factors.index)
+        self.stock_returns = stock_returns.loc[start_date : self.as_of_date]
+        self.industry_factors = industry_factors.loc[start_date : self.as_of_date]
+        common_dates = self.stock_returns.index.intersection(
+            self.industry_factors.index
+        )
         self.stock_returns = self.stock_returns.loc[common_dates]
         self.industry_factors = self.industry_factors.loc[common_dates]
 
     def estimate_exposures(self):
-        industry_exposures = pd.DataFrame(index=self.stock_returns.columns, columns=self.industry_factors.columns)
+        industry_exposures = pd.DataFrame(
+            index=self.stock_returns.columns, columns=self.industry_factors.columns
+        )
         specific_risk = pd.Series(index=self.stock_returns.columns)
-        residuals = pd.DataFrame(index=self.stock_returns.index, columns=self.stock_returns.columns)
+        residuals = pd.DataFrame(
+            index=self.stock_returns.index, columns=self.stock_returns.columns
+        )
 
         for stock in self.stock_returns.columns:
             if self.stock_returns[stock].isna().sum() > len(self.stock_returns) * 0.25:
@@ -143,19 +161,27 @@ class IndustryFactorRiskModel:
         means = np.average(reversed_factors, axis=0, weights=weights)
         demeaned = reversed_factors - means
         cov = np.cov(demeaned.T, aweights=weights)
-        self.factor_covariance = pd.DataFrame(cov, index=self.industry_factors.columns,
-                                              columns=self.industry_factors.columns)
+        self.factor_covariance = pd.DataFrame(
+            cov,
+            index=self.industry_factors.columns,
+            columns=self.industry_factors.columns,
+        )
 
     def build_complete_model(self, half_life=DEFAULT_HALFLIFE):
         self.estimate_exposures()
         self.calculate_factor_covariance(half_life=half_life)
 
 
-def generate_weekly_risk_models(start_date='2024-01-01', end_date='2024-12-31'):
-    sp500 = RiskModelUtils.get_or_cache_data(SP500_CACHE_FILE, RiskModelDataFetcher.fetch_sp500_returns, start_date,
-                                             end_date)
-    ff12 = RiskModelUtils.get_or_cache_data(FF12_CACHE_FILE, RiskModelDataFetcher.fetch_ff12_industries, start_date,
-                                            end_date)
+def generate_weekly_risk_models(start_date="2024-01-01", end_date="2024-12-31"):
+    sp500 = RiskModelUtils.get_or_cache_data(
+        SP500_CACHE_FILE, RiskModelDataFetcher.fetch_sp500_returns, start_date, end_date
+    )
+    ff12 = RiskModelUtils.get_or_cache_data(
+        FF12_CACHE_FILE,
+        RiskModelDataFetcher.fetch_ff12_industries,
+        start_date,
+        end_date,
+    )
 
     fridays = RiskModelUtils.get_fridays_between_dates("2024-01-01", "2024-12-31")
     summary = []
@@ -168,7 +194,9 @@ def generate_weekly_risk_models(start_date='2024-01-01', end_date='2024-12-31'):
         if date not in sp500.index:
             date = sp500.index[sp500.index <= date][-1]
 
-        model_path = os.path.join(WEEKLY_MODELS_DIR, f"risk_model_{date.strftime('%Y-%m-%d')}.pkl")
+        model_path = os.path.join(
+            WEEKLY_MODELS_DIR, f"risk_model_{date.strftime('%Y-%m-%d')}.pkl"
+        )
         if os.path.exists(model_path):
             model = IndustryFactorRiskModel.load(model_path)
         else:
@@ -178,47 +206,56 @@ def generate_weekly_risk_models(start_date='2024-01-01', end_date='2024-12-31'):
             model.serialize_risk_model(model_path)
 
         stat = {
-            'Date': date,
-            'Stocks_Count': model.stock_returns.shape[1],
-            'Valid_Stocks': model.industry_exposures.dropna(how='all').shape[0],
-            'Days_Used': len(model.stock_returns)
+            "Date": date,
+            "Stocks_Count": model.stock_returns.shape[1],
+            "Valid_Stocks": model.industry_exposures.dropna(how="all").shape[0],
+            "Days_Used": len(model.stock_returns),
         }
 
         # Get industry correlations instead of market stats
         if model.factor_covariance is not None:
             corr = model.factor_covariance.corr().abs()
             mask = ~np.eye(corr.shape[0], dtype=bool)
-            stat['Avg_Industry_Corr'] = corr.values[mask].mean()
+            stat["Avg_Industry_Corr"] = corr.values[mask].mean()
 
             # Get the industry with highest volatility
-            industry_vols = np.sqrt(np.diag(model.factor_covariance.values)) * np.sqrt(252)
+            industry_vols = np.sqrt(np.diag(model.factor_covariance.values)) * np.sqrt(
+                252
+            )
             max_vol_idx = np.argmax(industry_vols)
-            stat['Highest_Vol_Industry'] = model.factor_covariance.columns[max_vol_idx]
-            stat['Highest_Industry_Vol'] = industry_vols[max_vol_idx]
+            stat["Highest_Vol_Industry"] = model.factor_covariance.columns[max_vol_idx]
+            stat["Highest_Industry_Vol"] = industry_vols[max_vol_idx]
 
         summary.append(stat)
 
     df_summary = pd.DataFrame(summary)
-    df_summary.to_csv(os.path.join(WEEKLY_MODELS_DIR, "weekly_models_summary.csv"), index=False)
+    df_summary.to_csv(
+        os.path.join(WEEKLY_MODELS_DIR, "weekly_models_summary.csv"), index=False
+    )
 
     plt.figure(figsize=(12, 8))
     plt.subplot(2, 1, 1)
-    plt.plot(pd.to_datetime(df_summary['Date']), df_summary['Valid_Stocks'], marker='o')
-    plt.title('Number of Valid Stocks with Industry Exposures')
+    plt.plot(pd.to_datetime(df_summary["Date"]), df_summary["Valid_Stocks"], marker="o")
+    plt.title("Number of Valid Stocks with Industry Exposures")
     plt.grid(True)
 
-    if 'Highest_Industry_Vol' in df_summary.columns:
+    if "Highest_Industry_Vol" in df_summary.columns:
         plt.subplot(2, 1, 2)
-        plt.plot(pd.to_datetime(df_summary['Date']), df_summary['Highest_Industry_Vol'], marker='o', color='orange')
-        plt.title('Annualized Highest Industry Volatility')
+        plt.plot(
+            pd.to_datetime(df_summary["Date"]),
+            df_summary["Highest_Industry_Vol"],
+            marker="o",
+            color="orange",
+        )
+        plt.title("Annualized Highest Industry Volatility")
         plt.grid(True)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(WEEKLY_MODELS_DIR, 'weekly_model_summary.png'))
+    plt.savefig(os.path.join(WEEKLY_MODELS_DIR, "weekly_model_summary.png"))
     plt.show()
 
     return df_summary
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_weekly_risk_models()

@@ -12,7 +12,7 @@ def get_strategies_list():
 
     query_string = text(sql_query)
     strategy_names_df = DataAccessUtil.fetch_data_from_db(query_string)
-    return list(strategy_names_df['strategy_name'])
+    return list(strategy_names_df["strategy_name"])
 
 
 def get_back_test_date_range():
@@ -23,8 +23,12 @@ def get_back_test_date_range():
     query_string = text(sql_query)
     strategy_names_df = DataAccessUtil.fetch_data_from_db(query_string)
 
-    min_date = pd.to_datetime(strategy_names_df['min_date'].iloc[0]).strftime('%Y-%m-%d')
-    max_date = pd.to_datetime(strategy_names_df['max_date'].iloc[0]).strftime('%Y-%m-%d')
+    min_date = pd.to_datetime(strategy_names_df["min_date"].iloc[0]).strftime(
+        "%Y-%m-%d"
+    )
+    max_date = pd.to_datetime(strategy_names_df["max_date"].iloc[0]).strftime(
+        "%Y-%m-%d"
+    )
 
     return [min_date, max_date]
 
@@ -36,8 +40,10 @@ def get_all_rebalance_dates():
     query_string = text(sql_query)
 
     df = DataAccessUtil.fetch_data_from_db(query_string)
-    df['back_test_dates'] = pd.to_datetime(df['back_test_dates'])
-    date_labels = sorted(df['back_test_dates'].dt.strftime('%Y-%m-%d').tolist(), reverse=True)
+    df["back_test_dates"] = pd.to_datetime(df["back_test_dates"])
+    date_labels = sorted(
+        df["back_test_dates"].dt.strftime("%Y-%m-%d").tolist(), reverse=True
+    )
     return date_labels
 
 
@@ -48,14 +54,12 @@ def select_strategy():
         st.header("Select a strategy")
         if strategy_list:
             current_strategy = st.radio(
-                "Select a strategy",
-                strategy_list,
-                label_visibility="collapsed"
+                "Select a strategy", strategy_list, label_visibility="collapsed"
             )
         else:
             st.warning("No strategies available")
             current_strategy = None
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
     return current_strategy
 
 
@@ -96,8 +100,10 @@ def fetch_user_selection_strategies_and_one_bt_date():
 def select_a_back_test_date():
     date_labels = get_all_rebalance_dates()
 
-    st.markdown("<h5 style='font-weight: bold; color: #0096FF;'>Choose a date for risk decomposition analytics:</h5>",
-                unsafe_allow_html=True)
+    st.markdown(
+        "<h5 style='font-weight: bold; color: #0096FF;'>Choose a date for risk decomposition analytics:</h5>",
+        unsafe_allow_html=True,
+    )
     selected_date_str = st.selectbox("", date_labels)
 
     selected_date = pd.to_datetime(selected_date_str).date()
@@ -116,7 +122,7 @@ def select_trade_direction():
             "Select Trade Direction",
             ["Long", "Short", "Net"],
             index=2,  # Default to 'Net'
-            key="trade_direction_radio"
+            key="trade_direction_radio",
         )
     return trade_direction
 

@@ -21,13 +21,15 @@ class RebalanceData:
     rebalance_target_value: float = None
 
 
-def create_rebalance_data(strategy_name, rebalance_date, alpha_df, prices_df, rebalance_target_value):
+def create_rebalance_data(
+    strategy_name, rebalance_date, alpha_df, prices_df, rebalance_target_value
+):
     return RebalanceData(
         strategy_name=strategy_name,
         rebalance_date=rebalance_date,
         alpha_df=alpha_df,
         prices_df=prices_df,
-        rebalance_target_value=rebalance_target_value
+        rebalance_target_value=rebalance_target_value,
     )
 
 
@@ -89,35 +91,49 @@ class RebalanceUtil:
         return df
 
     @staticmethod
-    def get_new_portfolio_notional(aum_leverage_df, rebalance_date, current_pf_value, is_initial_rebalance=False):
+    def get_new_portfolio_notional(
+        aum_leverage_df, rebalance_date, current_pf_value, is_initial_rebalance=False
+    ):
         """Calculates new portfolio value based on AUM and leverage changes."""
         if not isinstance(rebalance_date, str):
             rebalance_date = pd.to_datetime(rebalance_date).strftime("%Y-%m-%d")
 
-        aum_data = aum_leverage_df[aum_leverage_df['date'] == rebalance_date]
+        aum_data = aum_leverage_df[aum_leverage_df["date"] == rebalance_date]
 
         if aum_data.empty:
             return current_pf_value
 
-        current_leverage = aum_data['target_leverage'].values[0]
+        current_leverage = aum_data["target_leverage"].values[0]
         if is_initial_rebalance:
-            aum = aum_data['aum'].values[0]
+            aum = aum_data["aum"].values[0]
             return aum * current_leverage
         else:
             # There are two components capital increase from second period onwards,
             # 1. First the leverage can be increased (or decreased)
             # 2. Second, new capital can be added (which in turn requires to be adjusted current target leverage)
-            in_out_flows = pd.to_numeric(aum_data['in_out_flows'], errors='coerce').fillna(0).values[0]
+            in_out_flows = (
+                pd.to_numeric(aum_data["in_out_flows"], errors="coerce")
+                .fillna(0)
+                .values[0]
+            )
             new_capital_inflows = current_leverage * in_out_flows
-            leverage_change = pd.to_numeric(aum_data['leverage_change'], errors='coerce').fillna(0).values[0]
+            leverage_change = (
+                pd.to_numeric(aum_data["leverage_change"], errors="coerce")
+                .fillna(0)
+                .values[0]
+            )
 
-            current_portfolio_value_with_out_leverage = current_pf_value / (current_leverage - leverage_change)
+            current_portfolio_value_with_out_leverage = current_pf_value / (
+                current_leverage - leverage_change
+            )
 
-            leverage_increase = current_leverage * current_portfolio_value_with_out_leverage
+            leverage_increase = (
+                current_leverage * current_portfolio_value_with_out_leverage
+            )
             return leverage_increase + new_capital_inflows
 
 
-class RebalancePortfolio():
+class RebalancePortfolio:
 
     def __init__(self, rebalance_data):
         self.rebalance_data = rebalance_data
@@ -130,7 +146,7 @@ class RebalancePortfolio():
         rebalance_target_value = self.rebalance_data.rebalance_target_value
         strategy_name = self.rebalance_data.strategy_name
 
-        if prices_df.empty or all(prices_df['value'] == 0):
+        if prices_df.empty or all(prices_df["value"] == 0):
             # No price data for the rebalance
             return pd.DataFrame()
 
@@ -141,19 +157,27 @@ class RebalancePortfolio():
         for direction in trade_directions:
             directional_target_value = rebalance_target_value / 2
             print(f"Optimizing {direction} positions...")
-            direction_df = alpha_scores_df[alpha_scores_df["trade_direction"] == direction].copy()
+            direction_df = alpha_scores_df[
+                alpha_scores_df["trade_direction"] == direction
+            ].copy()
 
             tickers = direction_df["ticker"].values
             weights_target = direction_df["weight"].values
-            price_series = prices_df.set_index('ticker')['value']
+            price_series = prices_df.set_index("ticker")["value"]
             prices = price_series.reindex(tickers).fillna(0).values
 
             try:
-                result_df = cvx_optimizer(tickers, prices, weights_target, directional_target_value)
+                result_df = cvx_optimizer(
+                    tickers, prices, weights_target, directional_target_value
+                )
             except Exception as e:
-                print("Error occurred in CVX based optimization. Now trying the simple greedy approach.")
+                print(
+                    "Error occurred in CVX based optimization. Now trying the simple greedy approach."
+                )
                 print(f"The error is {str(e)}")
-                result_df = greedy_allocation(tickers, prices, weights_target, directional_target_value)
+                result_df = greedy_allocation(
+                    tickers, prices, weights_target, directional_target_value
+                )
             result_df["direction"] = direction
             if direction == "Short":
                 result_df["shares"] = -1 * result_df["shares"]
@@ -168,7 +192,13 @@ class RebalancePortfolio():
 
         result_df = result_df.rename(columns={"price": "trade_open_price"})
         result_df["trade_open_date"] = rebalance_date
-        selected_columns = ['trade_open_date', 'ticker', 'shares', 'trade_open_price', 'direction']
+        selected_columns = [
+            "trade_open_date",
+            "ticker",
+            "shares",
+            "trade_open_price",
+            "direction",
+        ]
         result_df = result_df[selected_columns]
         result_df.loc[:, "trade_close_date"] = pd.NaT
         result_df.loc[:, "trade_close_price"] = np.nan

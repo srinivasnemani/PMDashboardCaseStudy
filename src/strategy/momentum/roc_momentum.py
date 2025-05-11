@@ -17,7 +17,9 @@ class RoCSignalData:
     price_data: pd.DataFrame = field(init=False)
 
     def __post_init__(self) -> None:
-        self.price_data = PriceDataFetcher.get_price_data(spec=self.spec, engine=get_db_engine())
+        self.price_data = PriceDataFetcher.get_price_data(
+            spec=self.spec, engine=get_db_engine()
+        )
 
 
 class RocSignal(Strategy):
@@ -36,10 +38,12 @@ class RocSignal(Strategy):
         px_last_df = px_last_df[sorted(px_last_df.columns)]
 
         # Step 4: Fill missing weekdays, apply 5-day moving average
-        df_daily_5d = px_last_df.asfreq('B').ffill().rolling(window=5, min_periods=1).mean()
+        df_daily_5d = (
+            px_last_df.asfreq("B").ffill().rolling(window=5, min_periods=1).mean()
+        )
 
         # Step 5: Resample to weekly (Friday close)
-        df_weekly = df_daily_5d.resample('W-FRI').last()
+        df_weekly = df_daily_5d.resample("W-FRI").last()
 
         # Step 6: Calculate 1w and 3w average RoC
         roc_1w = df_weekly.pct_change(periods=1)
@@ -54,13 +58,9 @@ class RocSignal(Strategy):
 
 
 if __name__ == "__main__":
-    start_date = '2023-09-01'
-    end_date = '2025-01-31'
-    spec = UniverseSpec(
-        universe='sp500',
-        start_date=start_date,
-        end_date=end_date
-    )
+    start_date = "2023-09-01"
+    end_date = "2025-01-31"
+    spec = UniverseSpec(universe="sp500", start_date=start_date, end_date=end_date)
 
     strategy = RocSignal(spec)
     build_and_store_signal(strategy, start_date, end_date)

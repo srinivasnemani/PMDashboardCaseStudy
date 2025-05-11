@@ -14,6 +14,7 @@ def format_currency(value):
     else:
         return f"${value:.0f}"
 
+
 def plot_sector_exposure_by_total_and_net(df: pd.DataFrame) -> go.Figure:
     """
     Create a visualization of sector exposure analysis with multiple views.
@@ -31,27 +32,27 @@ def plot_sector_exposure_by_total_and_net(df: pd.DataFrame) -> go.Figure:
     """
     # Create all four figures with text labels
     fig_gross_exposure_usd = go.Bar(
-        x=df['gics_sector'], 
-        y=df['gross_exposure_usd'], 
-        name='Gross Exposure USD',
-        text=[format_currency(v) for v in df['gross_exposure_usd']],
-        textposition='auto'
+        x=df["gics_sector"],
+        y=df["gross_exposure_usd"],
+        name="Gross Exposure USD",
+        text=[format_currency(v) for v in df["gross_exposure_usd"]],
+        textposition="auto",
     )
-    
+
     fig_net_exposure_usd = go.Bar(
-        x=df['gics_sector'], 
-        y=df['net_exposure_usd'], 
-        name='Net Exposure USD',
-        text=[format_currency(v) for v in df['net_exposure_usd']],
-        textposition='auto'
+        x=df["gics_sector"],
+        y=df["net_exposure_usd"],
+        name="Net Exposure USD",
+        text=[format_currency(v) for v in df["net_exposure_usd"]],
+        textposition="auto",
     )
-    
+
     fig_net_exposure_pct = go.Bar(
-        x=df['gics_sector'], 
-        y=df['net_exposure_pct'], 
-        name='Net Exposure Pct',
-        text=[f"{v:.2f}%" for v in df['net_exposure_pct']],
-        textposition='auto'
+        x=df["gics_sector"],
+        y=df["net_exposure_pct"],
+        name="Net Exposure Pct",
+        text=[f"{v:.2f}%" for v in df["net_exposure_pct"]],
+        textposition="auto",
     )
 
     # Create base figure
@@ -72,33 +73,62 @@ def plot_sector_exposure_by_total_and_net(df: pd.DataFrame) -> go.Figure:
         updatemenus=[
             dict(
                 active=0,
-                buttons=list([
-                    dict(label="Gross Exposure USD",
-                         method="update",
-                         args=[{"visible": [True, False, False]},
-                               {"title": {"text": "<b>Gross Exposure (USD)</b>", "x": 0.5}, 
-                                "xaxis": {"title": "Sectors"}, 
-                                "yaxis": {"title": "USD", "tickformat": ",.2s"}}]),
-                    dict(label="Net Exposure USD",
-                         method="update",
-                         args=[{"visible": [False, True, False]},
-                               {"title": {"text": "<b>Net Exposure (USD)</b>", "x": 0.5}, 
-                                "xaxis": {"title": "Sectors"}, 
-                                "yaxis": {"title": "USD", "tickformat": ",.2s"}}]),
-                    dict(label="Net Exposure %",
-                         method="update",
-                         args=[{"visible": [False, False, True]},
-                               {"title": {"text": "<b>Net Exposure (%)</b>", "x": 0.5}, 
-                                "xaxis": {"title": "Sectors"}, 
-                                "yaxis": {"title": "Net Exposure (%)"}}]),
-                ]),
-                x=0,                # <-- Move dropdown to left
-                xanchor="left",     # <-- Anchor to left
+                buttons=list(
+                    [
+                        dict(
+                            label="Gross Exposure USD",
+                            method="update",
+                            args=[
+                                {"visible": [True, False, False]},
+                                {
+                                    "title": {
+                                        "text": "<b>Gross Exposure (USD)</b>",
+                                        "x": 0.5,
+                                    },
+                                    "xaxis": {"title": "Sectors"},
+                                    "yaxis": {"title": "USD", "tickformat": ",.2s"},
+                                },
+                            ],
+                        ),
+                        dict(
+                            label="Net Exposure USD",
+                            method="update",
+                            args=[
+                                {"visible": [False, True, False]},
+                                {
+                                    "title": {
+                                        "text": "<b>Net Exposure (USD)</b>",
+                                        "x": 0.5,
+                                    },
+                                    "xaxis": {"title": "Sectors"},
+                                    "yaxis": {"title": "USD", "tickformat": ",.2s"},
+                                },
+                            ],
+                        ),
+                        dict(
+                            label="Net Exposure %",
+                            method="update",
+                            args=[
+                                {"visible": [False, False, True]},
+                                {
+                                    "title": {
+                                        "text": "<b>Net Exposure (%)</b>",
+                                        "x": 0.5,
+                                    },
+                                    "xaxis": {"title": "Sectors"},
+                                    "yaxis": {"title": "Net Exposure (%)"},
+                                },
+                            ],
+                        ),
+                    ]
+                ),
+                x=0,  # <-- Move dropdown to left
+                xanchor="left",  # <-- Anchor to left
                 y=1.2,
                 yanchor="top",
                 bordercolor="lightseagreen",
                 borderwidth=2,
-                bgcolor='mintcream'
+                bgcolor="mintcream",
             )
         ]
     )
@@ -108,14 +138,14 @@ def plot_sector_exposure_by_total_and_net(df: pd.DataFrame) -> go.Figure:
         title={
             "text": "<b>Sector Exposure Analysis</b>",
             "x": 0.5,
-            "xanchor": "center"
+            "xanchor": "center",
         },
         xaxis_title="Sectors",
         yaxis_title="Value",
         yaxis_tickformat=",.2s",
         showlegend=False,
         uniformtext_minsize=8,  # Minimum text size
-        uniformtext_mode='hide'  # Hide text if it doesn't fit
+        uniformtext_mode="hide",  # Hide text if it doesn't fit
     )
 
     return fig
@@ -125,29 +155,61 @@ if __name__ == "__main__":
     # To test the graph functionality before using it in dashboard.
     # Data preparation
     data = {
-        'gics_sector': [
-            'Communication Services', 'Consumer Discretionary', 'Consumer Staples',
-            'Financials', 'Health Care', 'Industrials', 'Information Technology',
-            'Real Estate', 'Utilities'
+        "gics_sector": [
+            "Communication Services",
+            "Consumer Discretionary",
+            "Consumer Staples",
+            "Financials",
+            "Health Care",
+            "Industrials",
+            "Information Technology",
+            "Real Estate",
+            "Utilities",
         ],
-        'gross_exposure_usd': [
-            6794352.75, 31565481.30, 46986853.11,
-            26150870.63, 76481404.66, 35526668.58,
-            58706068.89, 19092456.43, 43137117.64
+        "gross_exposure_usd": [
+            6794352.75,
+            31565481.30,
+            46986853.11,
+            26150870.63,
+            76481404.66,
+            35526668.58,
+            58706068.89,
+            19092456.43,
+            43137117.64,
         ],
-        'net_exposure_usd': [
-            -6794352.75, -31565481.30, 23916396.35,
-            16052411.00, -3225924.46, -3977362.21,
-            -44879676.37, 19092456.43, 31381716.03
+        "net_exposure_usd": [
+            -6794352.75,
+            -31565481.30,
+            23916396.35,
+            16052411.00,
+            -3225924.46,
+            -3977362.21,
+            -44879676.37,
+            19092456.43,
+            31381716.03,
         ],
-        'gross_exposure_pct': [
-            1.97, 9.16, 13.64, 7.59, 22.20, 10.31,
-            17.04, 5.54, 12.52
+        "gross_exposure_pct": [
+            1.97,
+            9.16,
+            13.64,
+            7.59,
+            22.20,
+            10.31,
+            17.04,
+            5.54,
+            12.52,
         ],
-        'net_exposure_pct': [
-            -1.97, -9.16, 6.94, 4.66, -0.94, -1.15,
-            -13.03, 5.54, 9.11
-        ]
+        "net_exposure_pct": [
+            -1.97,
+            -9.16,
+            6.94,
+            4.66,
+            -0.94,
+            -1.15,
+            -13.03,
+            5.54,
+            9.11,
+        ],
     }
 
     df = pd.DataFrame(data)

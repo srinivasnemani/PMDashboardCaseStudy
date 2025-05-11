@@ -20,10 +20,10 @@ class RiskModelDataUtil:
         factor_exposures = DataAccessUtil.fetch_data_from_db(query_string)
 
         pivoted_df = factor_exposures.pivot_table(
-            index=['date', 'ticker'],
-            columns='factor',
-            values='exposure',
-            aggfunc='first'  # In case there are duplicates
+            index=["date", "ticker"],
+            columns="factor",
+            values="exposure",
+            aggfunc="first",  # In case there are duplicates
         ).reset_index()
         return pivoted_df
 
@@ -38,7 +38,9 @@ class RiskModelDataUtil:
         """
         query_string = text(covariance_query)
         factor_covariance = DataAccessUtil.fetch_data_from_db(query_string)
-        factor_covariance_pivoted = factor_covariance.pivot(index='factor_1', columns='factor_2', values='covariance')
+        factor_covariance_pivoted = factor_covariance.pivot(
+            index="factor_1", columns="factor_2", values="covariance"
+        )
         return factor_covariance_pivoted
 
     @staticmethod
@@ -60,7 +62,9 @@ class RiskModelDataUtil:
         factor_covar = RiskModelDataUtil._fetch_factor_covariance(date_val)
         sp_risk = RiskModelDataUtil._fetch_sp_risk_residuals(date_val)
         list_factors = list(factor_covar.columns.unique())
-        risk_model_obj = RiskModel(date_val, list_factors, factor_exposures, factor_covar, sp_risk)
+        risk_model_obj = RiskModel(
+            date_val, list_factors, factor_exposures, factor_covar, sp_risk
+        )
         return risk_model_obj
 
 
