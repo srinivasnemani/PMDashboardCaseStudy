@@ -8,7 +8,8 @@ A Backtesting/portfolio management dashboard demo
 
 ### Live Demo
 
-*	The application is hosted and accessible at: [Live Demo](https://dashboardemo4-e2avdecjfuh7gdcx.westeurope-01.azurewebsites.net/)
+*	The application is hosted and accessible at: [Live Demo](https://dashboardemo5-afbvgzhqd9h3bpb6.westeurope-01.azurewebsites.net/)
+*	Application is hosted in Azure App Service Free tier. It may be slow and could take a few seconds to boot up.
 
 ## The code is divided into following modules
 
