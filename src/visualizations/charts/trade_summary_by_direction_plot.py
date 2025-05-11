@@ -2,12 +2,32 @@ import pandas as pd
 import plotly.graph_objects as go
 
 
+def format_currency(value):
+    """Format currency values in K, M, or B format."""
+    abs_value = abs(value)
+    if abs_value >= 1e9:
+        return f"${value / 1e9:.1f}B"
+    elif abs_value >= 1e6:
+        return f"${value / 1e6:.1f}M"
+    elif abs_value >= 1e3:
+        return f"${value / 1e3:.1f}K"
+    else:
+        return f"${value:.0f}"
+
+
 def plot_exposures_by_direction(df: pd.DataFrame) -> go.Figure:
     """
-    Plot a bar and pie chart with a dropdown to switch between
-    exposure and exposure_pct visualizations.
-    """
+    Create a visualization of exposures by direction.
 
+    Parameters:
+    df (pd.DataFrame): DataFrame containing exposure data with columns:
+        - gics_sector: Sector names
+        - exposure: Net exposure values
+        - exposure_pct: Exposure percentages
+
+    Returns:
+    go.Figure: Plotly figure showing exposures by direction
+    """
     # Updated colors
     plotly_blue = '#1f77b4'
     orangish_red = '#ff7f0e'
@@ -18,7 +38,9 @@ def plot_exposures_by_direction(df: pd.DataFrame) -> go.Figure:
         x=df['gics_sector'],
         y=df['exposure'],
         marker_color=colors,
-        showlegend=False
+        showlegend=False,
+        text=[format_currency(v) for v in df['exposure']],
+        textposition='auto'
     )
 
     # Dummy traces for manual legends
@@ -41,7 +63,7 @@ def plot_exposures_by_direction(df: pd.DataFrame) -> go.Figure:
         values=df['exposure_pct'],
         name='Exposure %',
         hole=0.3,
-        showlegend=False,
+        showlegend=True,
         visible=False
     )
 
@@ -58,7 +80,7 @@ def plot_exposures_by_direction(df: pd.DataFrame) -> go.Figure:
                     'method': 'update',
                     'args': [
                         {'visible': [True, True, True, False]},
-                        {'title': 'Exposure by GICS Sector (Bar Chart)',
+                        {'title': {'text': 'Exposure by GICS Sector (Bar Chart)', 'x': 0.5, 'xanchor': 'center'},
                          'yaxis': {'title': 'Exposure'}}
                     ]
                 },
@@ -67,29 +89,40 @@ def plot_exposures_by_direction(df: pd.DataFrame) -> go.Figure:
                     'method': 'update',
                     'args': [
                         {'visible': [False, False, False, True]},
-                        {'title': 'Exposure % by GICS Sector (Pie Chart)'}
+                        {'title': {'text': 'Gross Exposure % by GICS sector', 'x': 0.5, 'xanchor': 'center'}}
                     ]
                 }
             ],
             'direction': 'down',
             'showactive': True,
+            'x': 0,
+            'xanchor': 'left',
+            'y': 1.15,
+            'yanchor': 'top',
+            'bordercolor': 'lightseagreen',
+            'borderwidth': 2,
+            'bgcolor': 'mintcream'
         }],
-        title="Exposure by GICS Sector",
+        title={"text": "Exposure by GICS Sector", "x": 0.5, "xanchor": "center"},
         xaxis_title="GICS Sector",
         yaxis_title="Exposure",
         height=600,
         legend=dict(
-            orientation="h",
-            y=1.15,
-            x=0.5,
-            xanchor='center',
-            yanchor='bottom'
-        )
+            orientation="v",
+            y=1,
+            x=1,
+            xanchor='right',
+            yanchor='top',
+            title="GICS Sector"
+        ),
+        uniformtext_minsize=8,  # Minimum text size
+        uniformtext_mode='hide'  # Hide text if it doesn't fit
     )
 
     fig.update_yaxes(automargin=True)
 
     return fig
+
 
 if __name__ == "__main__":
     data = {

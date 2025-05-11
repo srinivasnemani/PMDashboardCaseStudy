@@ -2,6 +2,19 @@ import pandas as pd
 import plotly.graph_objects as go
 
 
+def format_currency(value):
+    """Format currency values in K, M, or B format with two decimals."""
+    abs_value = abs(value)
+    if abs_value >= 1e9:
+        return f"${value / 1e9:.2f}B"
+    elif abs_value >= 1e6:
+        return f"${value / 1e6:.2f}M"
+    elif abs_value >= 1e3:
+        return f"${value / 1e3:.2f}K"
+    else:
+        return f"${value:.2f}"
+
+
 def plot_factor_pnl_attributions(df: pd.DataFrame) -> go.Figure:
     """
     Creates a Plotly bar chart with a dropdown to select different metrics.
@@ -20,13 +33,6 @@ def plot_factor_pnl_attributions(df: pd.DataFrame) -> go.Figure:
         'pnl_contribution_pct': "PnL Contribution (%)"
     }
 
-    # Y-axis tick format mapping
-    tickformats = {
-        'factor_pnl_usd': None,
-        'factor_exposure_pct': ".6f",
-        'pnl_contribution_pct': ".2%"
-    }
-
     # Single consistent blue color
     bar_color = "#636EFA"
 
@@ -36,13 +42,31 @@ def plot_factor_pnl_attributions(df: pd.DataFrame) -> go.Figure:
     # Add bar traces for each metric
     metrics = ['factor_pnl_usd', 'factor_exposure_pct', 'pnl_contribution_pct']
     for i, col in enumerate(metrics):
+        if col in ['factor_exposure_pct', 'pnl_contribution_pct']:
+            y_vals = df[col] * 100
+            text_vals = [f"{v:.2f}%" for v in y_vals]
+            yaxis_tickformat = '.2f%'
+        else:
+            y_vals = df[col]
+            text_vals = [format_currency(v) for v in y_vals]
+            yaxis_tickformat = None
+        # Remove 'Residual' for factor_exposure_pct
+        if col == 'factor_exposure_pct':
+            mask = df['sector'] != 'Residual'
+            x_vals = df['sector'][mask]
+            y_vals = (df[col] * 100)[mask]
+            text_vals = [f"{v:.2f}%" for v in y_vals]
+        else:
+            x_vals = df['sector']
         fig.add_trace(
             go.Bar(
-                x=df['sector'],
-                y=df[col],
+                x=x_vals,
+                y=y_vals,
                 name=col,
                 marker_color=bar_color,
-                visible=(i == 0)  # Only first visible initially
+                visible=(i == 0),  # Only first visible initially
+                text=text_vals,
+                textposition='auto'
             )
         )
 
@@ -51,6 +75,10 @@ def plot_factor_pnl_attributions(df: pd.DataFrame) -> go.Figure:
     for i, col in enumerate(metrics):
         visibility = [False] * len(metrics)
         visibility[i] = True
+        if col in ['factor_exposure_pct', 'pnl_contribution_pct']:
+            yaxis_tickformat = '.2f%'
+        else:
+            yaxis_tickformat = None
         buttons.append(
             dict(
                 label=col,
@@ -60,7 +88,7 @@ def plot_factor_pnl_attributions(df: pd.DataFrame) -> go.Figure:
                     {
                         "title.text": f"<b>Selected Metric: {col}</b>",
                         "yaxis.title.text": yaxis_labels[col],
-                        "yaxis.tickformat": tickformats[col]
+                        "yaxis.tickformat": yaxis_tickformat
                     }
                 ]
             )

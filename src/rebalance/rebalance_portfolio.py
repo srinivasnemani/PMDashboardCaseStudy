@@ -122,7 +122,7 @@ class RebalancePortfolio():
     def __init__(self, rebalance_data):
         self.rebalance_data = rebalance_data
 
-    def rebalance_portfolio(self, rebalance_data):
+    def rebalance_portfolio(self):
         """Rebalances portfolio using alpha scores and target values."""
         alpha_scores_df = self.rebalance_data.alpha_df
         prices_df = self.rebalance_data.prices_df

@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import text
 
+from src.back_test.create_aggregated_fund_trades import \
+    create_aggregated_fund_trades
 from src.data_access.crud_util import DataAccessUtil
 from src.data_access.prices import PriceDataFetcher
 from src.data_access.schemas import UniverseSpec
@@ -142,7 +144,7 @@ class BackTest:
                                                    new_rebalance_opening_prices, new_notional)
 
             rb = RebalancePortfolio(rebalance_data)
-            new_portfolio = rb.rebalance_portfolio(rebalance_data)
+            new_portfolio = rb.rebalance_portfolio()
 
             update_trades(closed_trades_df)
             update_trades(new_portfolio)
@@ -157,6 +159,13 @@ class BackTest:
 
 
 if __name__ == "__main__":
-    back_test_data = create_backtest_data("MinVol", "2024-01-01", "2024-12-31")
-    bt = BackTest(back_test_data)
-    bt.run_backtest()
+    list_of_strategies = ["MinVol", "Mom_RoC"]
+    start_date, end_date = "2024-01-01", "2025-01-15"
+    for strategy in list_of_strategies:
+        back_test_data = create_backtest_data(strategy, start_date, end_date)
+        bt = BackTest(back_test_data)
+        bt.run_backtest()
+
+    # Finally create the aggregated fund trades by aggregating all trades as part of "AggregatedFund"
+    # This is simplification for the purpose of building dashboard (choice between data duplication vs simplicity)
+    create_aggregated_fund_trades()

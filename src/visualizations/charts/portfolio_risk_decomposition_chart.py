@@ -9,53 +9,61 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
 
     Parameters:
     df (pd.DataFrame): DataFrame containing risk decomposition data with columns:
-        - Factor Risk
-        - Specific Risk
-        - Total Risk
-        - Factor %
-        - Specific %
+        - Factor Risk (Annualized Variance)
+        - Specific Risk (Annualized Variance)
+        - Total Risk (Annualized Variance)
+        - Factor Risk (Annualized Vol)
+        - Specific Risk (Annualized Vol)
+        - Total Risk (Annualized Vol)
+        - Factor Risk Contribution %
+        - Specific Risk Contribution %
+        - Net Exposure Ratio
 
     Returns:
     go.Figure: Plotly figure showing risk decomposition
     """
-    factor_risk_pct = df["Factor Risk"].iloc[0]
-    specific_risk_pct = df["Specific Risk"].iloc[0]
-    total_risk_pct = df["Total Risk"].iloc[0]
-
-    factor_pct = df["Factor %"].iloc[0]
-    specific_pct = df["Specific %"].iloc[0]
-
     # Create a subplot figure with 1 row and 2 columns
     fig = make_subplots(rows=1, cols=2,
-                        specs=[[{"type": "bar"}, {"type": "domain"}]],
+                        specs=[[{"type": "bar"}, {"type": "pie"}]],
                         column_widths=[0.48, 0.48],
                         horizontal_spacing=0.08,
-                        subplot_titles=("Factor, Specific & Total Risk (%)", "Factor vs Specific %"))
+                        subplot_titles=("Risk Decomposition (Annualized Volatility)", "Risk Contribution % (Variance)")
+    )
 
-    # Bar Chart (Left)
+    # Bar Chart (Left) - Annualized Volatility metrics (as %)
+    factor_vol = df["Factor Risk (Annualized Vol)"].iloc[0] * 100
+    specific_vol = df["Specific Risk (Annualized Vol)"].iloc[0] * 100
+    total_vol = df["Total Risk (Annualized Vol)"].iloc[0] * 100
     fig.add_trace(
         go.Bar(
             x=["Factor Risk", "Specific Risk", "Total Risk"],
-            y=[factor_risk_pct * 100, specific_risk_pct * 100, total_risk_pct * 100],
-            text=[f"{factor_risk_pct * 100:.2f}%", f"{specific_risk_pct * 100:.2f}%", f"{total_risk_pct * 100:.2f}%"],
+            y=[factor_vol, specific_vol, total_vol],
+            text=[f"{factor_vol:.2f}%", f"{specific_vol:.2f}%", f"{total_vol:.2f}%"],
             textposition='auto',
-            name="Risk (%)"
+            name="Risk (Annualized Vol)",
+            marker_color='#636EFA',
+            showlegend=False
         ),
         row=1, col=1
     )
 
-    # Pie Chart (Right)
+    # Pie Chart (Right) - Risk Contribution % (Volatility)
+    factor_contrib = df["Factor Risk Contribution %"].iloc[0] * 100
+    specific_contrib = df["Specific Risk Contribution %"].iloc[0] * 100
     fig.add_trace(
         go.Pie(
-            labels=["Factor %", "Specific %"],
-            values=[factor_pct, specific_pct],
-            name="Risk %",
-            hole=0.4
+            labels=["Factor Risk Contribution", "Specific Risk Contribution"],
+            values=[factor_contrib, specific_contrib],
+            name="Risk Contribution %",
+            hole=0.4,
+            marker_colors=['#636EFA', '#EF553B'],
+            textinfo='text',
+            texttemplate='%{value:.2f}%',
         ),
         row=1, col=2
     )
 
-    # Add borders around bar and pie charts
+    # Add borders around bar charts
     fig.add_shape(
         type="rect",
         x0=0, y0=0, x1=0.48, y1=1,
@@ -74,7 +82,12 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
         width=1400,  # Wider format to fit screen
         height=600,
         title_text="Risk Breakdown: Factors Vs Idio",
-        showlegend=True
+        showlegend=True,
+        margin=dict(l=40, r=40, t=80, b=40),
+        xaxis_title="Risk Type",
+        yaxis_title="Annualized Volatility (%)",
+        yaxis=dict(tickformat=".2f%", ticksuffix="%"),
+        # yaxis2 is not needed for pie chart
     )
 
     return fig
@@ -83,11 +96,15 @@ def plot_portfolio_risk_decomposition(df: pd.DataFrame) -> go.Figure:
 if __name__ == "__main__":
     # To test the graph functionality before using it in dashboard.
     data = {
-        "Factor Risk": [0.17574747],
-        "Specific Risk": [0.023790003],
-        "Total Risk": [0.199537473],
-        "Factor %": [0.880774259],
-        "Specific %": [0.119225741]
+        "Factor Risk (Annualized Variance)": [0.17574747],
+        "Specific Risk (Annualized Variance)": [0.023790003],
+        "Total Risk (Annualized Variance)": [0.199537473],
+        "Factor Risk (Annualized Vol)": [0.419222],
+        "Specific Risk (Annualized Vol)": [0.154239],
+        "Total Risk (Annualized Vol)": [0.446696],
+        "Factor Risk Contribution %": [0.880774259],
+        "Specific Risk Contribution %": [0.119225741],
+        "Net Exposure Ratio": [0.95]
     }
     df = pd.DataFrame(data)
     fig = plot_portfolio_risk_decomposition(df)

@@ -30,16 +30,16 @@ def calcualte_exposures_by_direction_net_total(df: pd.DataFrame):
     if 'Short' not in exposures_pivot.columns:
         exposures_pivot['Short'] = 0
 
-    exposures_pivot['absolute_exposure_usd'] = exposures_pivot['Long'].abs() + exposures_pivot['Short'].abs()
+    exposures_pivot['gross_exposure_usd'] = exposures_pivot['Long'].abs() + exposures_pivot['Short'].abs()
     exposures_pivot['net_exposure_usd'] = exposures_pivot['Long'] + exposures_pivot['Short']
 
-    total_absolute_exposure = exposures_pivot['absolute_exposure_usd'].sum()
+    total_gross_exposure = exposures_pivot['gross_exposure_usd'].sum()
 
-    exposures_pivot['absolute_exposure_pct'] = (
-            exposures_pivot['absolute_exposure_usd'] / total_absolute_exposure * 100
+    exposures_pivot['gross_exposure_pct'] = (
+            exposures_pivot['gross_exposure_usd'] / total_gross_exposure * 100
     )
     exposures_pivot['net_exposure_pct'] = (
-            exposures_pivot['net_exposure_usd'] / total_absolute_exposure * 100
+            exposures_pivot['net_exposure_usd'] / total_gross_exposure * 100
     )
 
     exposures_net_total = exposures_pivot.reset_index()

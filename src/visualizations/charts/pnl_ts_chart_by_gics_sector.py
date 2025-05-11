@@ -38,11 +38,20 @@ def plot_ts_gics_sector_pnl(grouped_df: pd.DataFrame) -> go.Figure:
     buttons = []
     for i, metric in enumerate(metrics):
         visibility = [m == metric for m in metrics for _ in grouped_df['gics_sector'].unique()]
+        if metric == 'cumulative_pnl_pct':
+            tickformat = ".1%"
+        else:
+            tickformat = ",.2s"
         buttons.append(dict(
             method='update',
             label=labels[metric],
-            args=[{'visible': visibility},
-                  {'title': f'{labels[metric]} by GICS Sector', 'yaxis': {'title': labels[metric]}}]
+            args=[
+                {'visible': visibility},
+                {
+                    'title': {'text': f'<b>{labels[metric]} by GICS Sector</b>', 'x': 0.5, 'xanchor': 'center'},
+                    'yaxis': {'title': labels[metric], 'tickformat': tickformat}
+                }
+            ]
         ))
 
     fig.update_layout(
@@ -53,9 +62,12 @@ def plot_ts_gics_sector_pnl(grouped_df: pd.DataFrame) -> go.Figure:
             x=0,
             y=1.15,
             xanchor='left',
-            yanchor='top'
+            yanchor='top',
+            bordercolor='lightseagreen',
+            borderwidth=2,
+            bgcolor='mintcream'
         )],
-        title='Cumulative PnL (USD) by GICS Sector',
+        title={'text': '<b>Cumulative PnL (USD) by GICS Sector</b>', 'x': 0.5, 'xanchor': 'center'},
         xaxis_title='Trade Open Date',
         yaxis_title='Cumulative PnL (USD)',
         hovermode='x unified',

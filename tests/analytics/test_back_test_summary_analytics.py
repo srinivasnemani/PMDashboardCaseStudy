@@ -60,10 +60,10 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_return_metrics()
-        assert "absolute_return" in metrics
-        assert "annualized_return" in metrics
-        assert "cumulative_return" in metrics
-        assert isinstance(metrics["absolute_return"], float)
+        assert "Absolute Return" in metrics
+        assert "Annualized Return" in metrics
+        assert "Cumulative Return" in metrics
+        assert isinstance(metrics["Absolute Return"], float)
 
     def test_calculate_risk_adjusted_metrics(self):
         """Test calculation of risk-adjusted metrics."""
@@ -73,10 +73,10 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_risk_adjusted_metrics()
-        assert "sharpe_ratio" in metrics
-        assert "sortino_ratio" in metrics
-        assert "information_ratio" in metrics
-        assert isinstance(metrics["sharpe_ratio"], float)
+        assert "Sharpe Ratio" in metrics
+        assert "Sortino Ratio" in metrics
+        assert "Information Ratio" in metrics
+        assert isinstance(metrics["Sharpe Ratio"], float)
 
     def test_calculate_risk_metrics(self):
         """Test calculation of risk metrics."""
@@ -86,10 +86,10 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_risk_metrics()
-        assert "volatility" in metrics
-        assert "beta" in metrics
-        assert "alpha" in metrics
-        assert isinstance(metrics["volatility"], float)
+        assert "Volatility" in metrics
+        assert "Beta" in metrics
+        assert "Alpha" in metrics
+        assert isinstance(metrics["Volatility"], float)
 
     def test_calculate_drawdown_metrics(self):
         """Test calculation of drawdown metrics."""
@@ -98,9 +98,9 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_drawdown_metrics()
-        assert "maximum_drawdown" in metrics
-        assert "calmar_ratio" in metrics
-        assert isinstance(metrics["maximum_drawdown"], float)
+        assert "Maximum Drawdown" in metrics
+        assert "Calmar Ratio" in metrics
+        assert isinstance(metrics["Maximum Drawdown"], float)
 
     def test_summary_dataframe(self):
         """Test generation of summary dataframe."""
@@ -120,8 +120,8 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_all_metrics()
-        assert metrics["return_based_measures"]["absolute_return"] == 0.0
-        assert metrics["risk_measures"]["volatility"] == 0.0
+        assert metrics["Return Based Measures"]["Absolute Return"] == 0.0
+        assert metrics["Risk Measures"]["Volatility"] == 0.0
 
     def test_edge_case_negative_returns(self):
         """Test edge case with all negative returns."""
@@ -130,5 +130,5 @@ class TestBackTestSummaryAnalytics:
         analytics = BackTestSummaryAnalytics(backtest_data)
 
         metrics = analytics.calculate_all_metrics()
-        assert metrics["return_based_measures"]["absolute_return"] < 0
-        assert metrics["drawdown_metrics"]["maximum_drawdown"] < 0
+        assert metrics["Return Based Measures"]["Absolute Return"] < 0
+        assert metrics["Drawdown Metrics"]["Maximum Drawdown"] < 0

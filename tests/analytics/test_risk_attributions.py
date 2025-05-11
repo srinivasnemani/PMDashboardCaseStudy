@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import pytest
 
@@ -76,10 +78,16 @@ def test_compute_portfolio_risk_decomposition(risk_attributions):
     result = risk_attributions.compute_portfolio_risk_decomposition()
 
     assert isinstance(result, pd.DataFrame)
-    assert "Factor Risk" in result.columns
-    assert "Specific Risk" in result.columns
-    assert "Total Risk" in result.columns
-    assert abs(result["Factor %"].iloc[0] + result["Specific %"].iloc[0] - 1.0) < 1e-10
+    assert "Factor Risk (Annualized Variance)" in result.columns
+    assert "Specific Risk (Annualized Variance)" in result.columns
+    assert "Total Risk (Annualized Variance)" in result.columns
+    assert "Factor Risk (Annualized Vol)" in result.columns
+    assert "Specific Risk (Annualized Vol)" in result.columns
+    assert "Total Risk (Annualized Vol)" in result.columns
+    assert "Factor Risk Contribution %" in result.columns
+    assert "Specific Risk Contribution %" in result.columns
+    # The sum of contributions should be close to 1.0
+    assert abs(result["Factor Risk Contribution %"].iloc[0] + result["Specific Risk Contribution %"].iloc[0] - 1.0) < 1e-10
 
     # Test case 2: Risk decomposition with filtered trades
     trade_data = create_sample_trade_data()
@@ -90,27 +98,15 @@ def test_compute_portfolio_risk_decomposition(risk_attributions):
 
     assert isinstance(result_filtered, pd.DataFrame)
     assert len(result_filtered) == 1
-
-
-def test_compute_factor_risk_marginal_contributions(risk_attributions):
-    # Test case 1: Basic marginal contributions
-    result = risk_attributions.compute_factor_risk_marginal_contributions()
-
-    assert isinstance(result, pd.DataFrame)
-    assert "Factor" in result.columns
-    assert "Risk Contribution" in result.columns
-    assert "Contribution %" in result.columns
-    assert abs(result["Contribution %"].sum() - 1.0) < 1e-10
-
-    # Test case 2: Marginal contributions with different factor exposures
-    trade_data = create_sample_trade_data()
-    trade_data["shares"] = [50, 100]  # Different position sizes
-    risk_model = MockRiskModel()
-    risk_attributions_diff = RiskFactorAttributions(trade_data, risk_model)
-    result_diff = risk_attributions_diff.compute_factor_risk_marginal_contributions()
-
-    assert isinstance(result_diff, pd.DataFrame)
-    assert len(result_diff) == len(risk_model.factor_names)
+    assert "Factor Risk (Annualized Variance)" in result_filtered.columns
+    assert "Specific Risk (Annualized Variance)" in result_filtered.columns
+    assert "Total Risk (Annualized Variance)" in result_filtered.columns
+    assert "Factor Risk (Annualized Vol)" in result_filtered.columns
+    assert "Specific Risk (Annualized Vol)" in result_filtered.columns
+    assert "Total Risk (Annualized Vol)" in result_filtered.columns
+    assert "Factor Risk Contribution %" in result_filtered.columns
+    assert "Specific Risk Contribution %" in result_filtered.columns
+    assert abs(result_filtered["Factor Risk Contribution %"].iloc[0] + result_filtered["Specific Risk Contribution %"].iloc[0] - 1.0) < 1e-10
 
 
 def test_compute_full_risk_decomposition(risk_attributions):
@@ -121,7 +117,9 @@ def test_compute_full_risk_decomposition(risk_attributions):
     assert "Factor" in result.columns
     assert "Risk Contribution" in result.columns
     assert "Contribution %" in result.columns
-    assert abs(result["Contribution %"].sum() - 1.0) < 1e-10
+    # Contribution % should sum to 100 (with a small tolerance for floating point error)
+    # Exclude the "Total" row when checking the sum
+    assert math.isclose(result[result["Factor"] != "Total"]["Contribution %"].sum(), 100.0, rel_tol=1e-4, abs_tol=1e-4)
 
     # Test case 2: Full risk decomposition with specific risk
     trade_data = create_sample_trade_data()
@@ -143,7 +141,6 @@ def test_compute_all_factor_attributions(risk_attributions):
     assert isinstance(result, dict)
     assert "factor_pnl_attribution" in result
     assert "portfolio_risk_decomposition" in result
-    assert "factor_risk_marginal_contributions" in result
     assert "full_risk_decomposition" in result
 
     # Test case 2: All attributions with single trade
@@ -158,7 +155,6 @@ def test_compute_all_factor_attributions(risk_attributions):
         for key in [
             "factor_pnl_attribution",
             "portfolio_risk_decomposition",
-            "factor_risk_marginal_contributions",
             "full_risk_decomposition",
         ]
     )

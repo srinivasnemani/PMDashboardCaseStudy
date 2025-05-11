@@ -25,7 +25,7 @@ def render_exposure_time_series(df: pd.DataFrame, measure_type: Literal["USD", "
         fig.add_trace(go.Scatter(x=df['trade_open_date'], y=df['short_exposure'], mode='lines', name='Short Exposure'))
         fig.add_trace(
             go.Scatter(x=df['trade_open_date'], y=df['net_exposure'], mode='lines+markers', name='Net Exposure'))
-        fig.add_trace(go.Scatter(x=df['trade_open_date'], y=df['total_exposure'], mode='lines', name='Total Exposure'))
+        fig.add_trace(go.Scatter(x=df['trade_open_date'], y=df['total_exposure'], mode='lines', name='Gross Exposure'))
         y_axis_title = "Exposure (USD)"
         percentage_format = False
     elif measure_type == "Pct":
@@ -47,7 +47,8 @@ def render_exposure_time_series(df: pd.DataFrame, measure_type: Literal["USD", "
         "yaxis_title": y_axis_title,
         "legend_title": "Exposure Type",
         "height": 600,
-        "template": 'seaborn'
+        "template": 'seaborn',
+        "title": {"text": "Exposures Over Time", "x": 0.5, "xanchor": "center"}
     }
 
     # Add percentage formatting if needed
@@ -77,28 +78,26 @@ def render_leverage_time_series(df: pd.DataFrame, measure_type: Literal["Leverag
     if measure_type == "Leverage":
         fig.add_trace(go.Scatter(x=df['date'], y=df['target_leverage'], mode='lines', name='Target Leverage'))
         y_axis_title = "Leverage"
-    elif measure_type == "Capital":  # Fixed syntax error by removing extra colon
+        plot_title = "Leverage Ratio"
+    elif measure_type == "Capital":
         fig.add_trace(go.Scatter(x=df['date'], y=df['aum'], mode='lines', name='Capital'))
         y_axis_title = "Capital (USD)"
-    elif measure_type == "Target Exposure":  # Fixed syntax error by removing extra colon
+        plot_title = "Capital Allocations (USD)"
+    elif measure_type == "Target Exposure":
         # Calculate target exposure dynamically
         df['calculated_target_exposure'] = df['aum'] * df['target_leverage']
         fig.add_trace(go.Scatter(x=df['date'], y=df['calculated_target_exposure'], mode='lines',
                                  name='Target Exposure (AUM × Leverage)'))
         y_axis_title = "Target Exposure (USD)"
-
-    # Add strategy name to titles if multiple strategies exist
-    if len(df['strategy_name'].unique()) > 1:
-        fig.update_layout(title=f"Multiple Strategies")
-    else:
-        fig.update_layout(title=f"Strategy: {df['strategy_name'].iloc[0]}")
+        plot_title = "Gross Target Exposure (USD)"
 
     fig.update_layout(
         xaxis_title="Date",
         yaxis_title=y_axis_title,
         legend_title="Metric",
         height=600,
-        template='seaborn'
+        template='seaborn',
+        title={"text": plot_title, "x": 0.5, "xanchor": "center"}
     )
     return fig
 

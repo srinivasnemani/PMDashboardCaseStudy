@@ -1,0 +1,28 @@
+<div style="font-size: 18px;">
+    <p>The above <a href="/Rebalance_Analysis" target="_self">Rebalance Data Analysis</a> page shows only single-period trade analysis. However, Portfolio Managers are often more interested about delta trade analysis. 
+    <br>Its more insightful to know delta(changes) in portfolio composition versus the pre-rebalance situation. It important to know why and how the portfolio composition is changing and the heuristics of trade attributions.</p>
+    <p>Following visuals will be helpful for Portfolio managers (PMs) to track the exposure changes across multiple dimensions, such as:</p>
+    <ul>
+        <li>Exposure changes by sectors or industries</li>
+        <li>Exposure changes by regions or countries</li>
+        <li>Changes in the compositions (or tilts) in risk factors exposures</li>
+        <li>Changes in the compositions of alpha factor exposures</li>
+    </ul>
+    <br>
+    <h4>Trade Attribution Analysis</h4>
+    <p>PM may also want to attribute reasons behind the trades, which may include:</p>
+    <ul>
+        <li><b>Alpha-seeking trades:</b> For instance, a trade might be executed to increase the portfolio's exposure to high-alpha securities. This can be validated by plotting Alpha Scores Vs. Trade Direction. Ideally, the buy-side trades should be concentrated in securities with higher alpha scores, while sell-side trades should involve lower-alpha securities.</li>
+        <li><b>Risk reduction (Benchmark alignment) trades:</b> In the case of benchmark-constrained investors, some trades may need to be executed to manage active (or under) weights even if the alpha score of the security is not favorable.</li>
+    </ul>
+    <p>This trade attribution analytics can be combined or validated against the Portfolio Optimizer solution logs (if the optimizer provides insights into details of the optimization process).</p>
+    <br>
+    <h4>Tracking Error Decomposition Analytics</h4>
+    <p>Though it is less relevant for Long-Short market neutral portfolios, for benchmark constrained investors tracking error decompositions are an important and closely monitored analytics for compliance reasons.</p>
+    Tracking error decompositions can be done by:
+    <ul>
+        <li>by industry/sector/country/region</li>
+        <li>by risk factors</li>
+    </ul>
+    <p> For large AUM investors, other trade execution analytics related to implementation shortfall, slippage, and market impact costs could be relevant and interesting.</p>
+</div> 

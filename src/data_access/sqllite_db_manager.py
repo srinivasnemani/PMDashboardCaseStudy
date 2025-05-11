@@ -9,6 +9,7 @@ from sqlalchemy.engine import Engine
 
 # Database path configuration
 SQLLITE_DB_PATH = Path(r"C:\CaseStudy\dbs\sp500_data.db")
+SQLLITE_DB_PATH = Path(__file__).parent.parent.parent / "dbs" / "sp500_data.db"
 # SQLLITE_DB_PATH = Path(r"C:\CaseStudy\dbs\sp500_data_2test.db")
 
 # Configure logging
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     db_manager = DatabaseManager()
 
     # Create tables
-    # alpha_success = db_manager.create_alpha_table()
+    alpha_success = db_manager.create_alpha_table()
     # trade_success = db_manager.create_trade_booking_table()
     success_flag = db_manager.create_aum_leverage_table()
 

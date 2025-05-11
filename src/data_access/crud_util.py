@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+from sqlalchemy import text
 
 from src.data_access.sqllite_db_manager import get_db_engine
 
@@ -9,6 +10,42 @@ logger = logging.getLogger(__name__)
 
 
 class DataAccessUtil:
+
+    @staticmethod
+    def execute_statement(sql_query, params=None, engine=None):
+        """
+        Executes a SQL statement without returning results.
+        Useful for INSERT, UPDATE, DELETE operations.
+
+        Args:
+            sql_query: SQL query string to execute
+            params: Optional parameters for the query (can be list, tuple, or dict)
+            engine: Optional SQLAlchemy engine instance
+
+        Returns:
+            bool: True if execution was successful, False otherwise
+        """
+        try:
+            if engine is None:
+                engine = get_db_engine()
+
+            with engine.connect() as conn:
+                if params is None:
+                    conn.execute(text(sql_query))
+                else:
+                    # Ensure params is a tuple
+                    if isinstance(params, list):
+                        params = tuple(params)
+                    elif not isinstance(params, tuple):
+                        params = (params,)
+                    conn.execute(text(sql_query), params)
+                conn.commit()
+            
+            logger.info("SQL statement executed successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Error executing SQL statement: {str(e)}")
+            return False
 
     @staticmethod
     def fetch_data_from_db(sql_query, params=None, engine=None):

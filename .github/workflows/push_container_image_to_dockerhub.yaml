@@ -1,0 +1,57 @@
+name: Build and Push Docker Image to DockerHub
+
+on:
+  workflow_dispatch:  # Enable manual triggering
+  repository_dispatch:
+    types: [trigger-docker-build]
+  push:
+    branches:
+      - main  # Trigger on push to main branch
+    paths:
+      - 'Dockerfile'  # Only trigger when Dockerfile changes
+      - 'src/**'      # Or when source code changes
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Print Credential Lengths
+        run: |
+          echo "=== Credential Length Check ==="
+          echo "DOCKER_HUB_LOGIN_NAME length: ${#DOCKER_HUB_LOGIN_NAME} characters"
+          echo "DOCKER_HUB_KEY_FOR_PM_BACKTEST_DASHBOARD length: ${#DOCKER_HUB_KEY} characters"
+          echo "==============================="
+        env:
+          DOCKER_HUB_LOGIN_NAME: ${{ secrets.DOCKER_HUB_LOGIN_NAME }}
+          DOCKER_HUB_KEY: ${{ secrets.DOCKER_HUB_KEY_FOR_PM_BACKTEST_DASHBOARD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_LOGIN_NAME }}
+          password: ${{ secrets.DOCKER_HUB_KEY_FOR_PM_BACKTEST_DASHBOARD }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.DOCKER_HUB_LOGIN_NAME }}/streamlit-backtest
+          tags: |
+            type=raw,value=test-1
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max 

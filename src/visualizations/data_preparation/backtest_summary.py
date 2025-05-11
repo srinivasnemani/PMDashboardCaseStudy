@@ -108,19 +108,4 @@ def format_dataframe(df, format_dict):
 
 if __name__ == "__main__":
     v1 = create_back_test_summary("MinVol", "2024-01-01", "2024-12-31", "Long")
-
-    format_map = {
-        'Absolute Return': '{:.2%}',
-        'Annualized Return': '{:.2%}',
-        'Cumulative Return': '{:.2%}',
-        'Sharpe Ratio': '{:.2f}',
-        'Sortino Ratio': '{:.2f}',
-        'Information Ratio': '{:.2f}',
-        'Volatility': '{:.2%}',
-        'Beta': '{:.2f}',
-        'Alpha': '{:.2%}',
-        'Maximum Drawdown': '{:.2%}',
-        'Calmar Ratio': '{:.2f}'
-    }
-    v3 = v1.style.format(format_map)
-    print(v3)
+    print(v1)

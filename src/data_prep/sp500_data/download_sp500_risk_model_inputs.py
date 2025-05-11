@@ -15,6 +15,7 @@ def get_sp500_tickers():
         print(f"Error getting S&P 500 information: {e}")
         return []
 
+
 # Step 2: Fetch data from Yahoo Finance
 def fetch_fundamental_data(tickers):
     data = []
@@ -27,7 +28,6 @@ def fetch_fundamental_data(tickers):
             if hist.empty:
                 continue
 
-            latest_close = hist["Close"].iloc[-1]
             market_cap = info.get("marketCap", np.nan)
 
             data.append({
@@ -45,6 +45,7 @@ def fetch_fundamental_data(tickers):
         except Exception as e:
             print(f"Failed for {ticker}: {e}")
     return pd.DataFrame(data)
+
 
 # Step 3: Main execution
 if __name__ == "__main__":

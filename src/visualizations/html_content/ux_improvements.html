@@ -1,0 +1,39 @@
+<div style="font-size: 18px;">
+    <h3>UX and General Improvements</h3>
+    <ol>
+        <li>Add trade-direction (long/short/net) interactive filters in relevant pages such as Performance Analysis, Risk Factor Analysis, etc.</li>
+        <li>Improve state management: Streamlit runs top-down every time a user clicks or navigates to a new page, causing previous user selections to be lost. Implement session state to preserve user selections across page navigation.</li>
+        <li>Implement consistent cross-filtering functionality (similar to tools like Qlik and PowerBI). This enhancement depends on the improved state management mentioned above.</li>
+        <li>Add Month-to-Date (MTD) and Year-to-Date (YTD) filter buttons in live portfolio dashboards to provide quick access to frequently monitored time periods.</li>
+        <li>Ideally, well-designed dashboards act as self-service tools to go deeper into the underlying data and intermediate calculations, not merely top-level summaries. This can be achieved by integrating various inputs (eg: alpha scores) and other intermediate calculations used in the rebalancing or backtesting processes.</li>
+    </ol>
+</div>
+<div style="font-size: 18px;">
+    <ol style="list-style-type: none; padding-left: 0;">
+        <li> Some improvement thoughts in the existing pages</li>
+        <li><b>1. Back Test Summary</b><br>
+            This page currently only shows summaries. It would be more valuable to display various time series graphs for analytics such as:
+            <ul>
+                <li>a) Volatility, b) Drawdowns, c) Tracking Error, d) Beta</li>
+            </ul>
+        </li><br>
+        <li><b>2. Performance Analysis</b><br>
+            Add more Group By analysis options: For example, to better understand the contribution by each group (sectors/country), pie charts could be incorporated.
+        </li><br>
+        <li><b>3. Risk Factor Attributions</b><br>
+            The current risk model used is simplistic, with only one group based on SEC industry classifications. Commercial risk models typically include distinct groupings such as:
+            <ul>
+                <li>Style Factors</li>
+                <li>Industry Factors</li>
+                <li>Country Factors, Currency Factors (Global Models)</li>
+            </ul>
+            The visualizations should be flexible to allow users to select/filter these groups.
+        </li><br>
+        <li><b>4. Rebalance Analysis</b><br>
+            Similar to the Performance Analysis improvements, additional Group By capabilities could be added.
+        </li><br>
+        <li><b>5. Stress Test analysis</b><br>
+        For reporting needs, a new page with VaR analysis numbers and historical or hypothetical scenario P&Ls could be added.
+        </li>
+    </ol>
+</div> 

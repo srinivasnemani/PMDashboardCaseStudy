@@ -185,7 +185,8 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
                 {"visible": [True, True, True, False, False, False, False, False, False, False, False, False]},
                 {
                     "title": dict(text="Cumulative PnL (USD)", x=0.5, xanchor="center"),
-                    "yaxis.title.text": "PnL (USD)"
+                    "yaxis.title.text": "PnL (USD)",
+                    "yaxis.tickformat": ",.2s"
                 }
             ]
         ),
@@ -208,7 +209,8 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
                 {"visible": [False, False, False, False, False, False, True, True, True, False, False, False]},
                 {
                     "title": dict(text="Daily PnL (USD)", x=0.5, xanchor="center"),
-                    "yaxis.title.text": "PnL (USD)"
+                    "yaxis.title.text": "PnL (USD)",
+                    "yaxis.tickformat": ",.2s"
                 }
             ]
         ),
@@ -262,7 +264,10 @@ def plot_pnl_series_by_trade_direction(df: pd.DataFrame, date_column: str = 'tra
                 x=0.1,
                 xanchor="left",
                 y=1.15,
-                yanchor="top"
+                yanchor="top",
+                bordercolor='lightseagreen',
+                borderwidth=2,
+                bgcolor='mintcream'
             )
         ]
     )

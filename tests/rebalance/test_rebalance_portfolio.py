@@ -1,5 +1,7 @@
 from datetime import date
+
 import pandas as pd
+
 from src.rebalance.rebalance_portfolio import (RebalanceData,
                                                RebalancePortfolio,
                                                RebalanceUtil,
@@ -61,7 +63,7 @@ def test_rebalance_portfolio_basic():
     )
 
     rebalancer = RebalancePortfolio(rebalance_data)
-    result = rebalancer.rebalance_portfolio(rebalance_data)
+    result = rebalancer.rebalance_portfolio()
 
     # Check result structure
     assert isinstance(result, pd.DataFrame)
@@ -102,7 +104,7 @@ def test_rebalance_portfolio_zero_prices():
     )
 
     rebalancer = RebalancePortfolio(rebalance_data)
-    result = rebalancer.rebalance_portfolio(rebalance_data)
+    result = rebalancer.rebalance_portfolio()
 
     # Should return empty DataFrame when all prices are zero
     assert isinstance(result, pd.DataFrame)
@@ -133,7 +135,7 @@ def test_rebalance_portfolio_single_direction():
     )
 
     rebalancer = RebalancePortfolio(rebalance_data)
-    result = rebalancer.rebalance_portfolio(rebalance_data)
+    result = rebalancer.rebalance_portfolio()
 
     # Check that all positions are long
     assert all(result['direction'] == 'Long')
@@ -164,7 +166,7 @@ def test_rebalance_portfolio_short_positions():
     )
 
     rebalancer = RebalancePortfolio(rebalance_data)
-    result = rebalancer.rebalance_portfolio(rebalance_data)
+    result = rebalancer.rebalance_portfolio()
 
     # Check that all positions are short
     assert all(result['direction'] == 'Short')
