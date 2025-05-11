@@ -2,22 +2,29 @@
 
 A Backtesting/portfolio management dashboard demo
 
-## Features
+### Docker
+
+* 	A Docker image of this application is available here: [Docker image](https://hub.docker.com/r/mail2srinivasnemani/streamlit-backtest)
+
+### Live Demo
+
+*	The application is hosted and accessible at: [Live Demo](https://dashboardemo3-fmdkbmgyauhac9aa.westeurope-01.azurewebsites.net/)
+
+## The code is divided into following modules
 
 - **Data Management**
   - Data preparation and cleaning
   - Historical data access and management
   - Data storage and retrieval
 
+- **Strategy Development**
+  - Portfolio rebalancing
+  - Backtesting capabilities
+
 - **Portfolio Analysis**
   - Portfolio construction and optimization
   - Performance analytics and metrics
   - Risk attributions
-
-- **Strategy Development**
-  - Portfolio rebalancing
-  - Backtesting capabilities
-  
 
 - **Visualization**
   - Interactive dashboards for 
@@ -36,7 +43,6 @@ A Backtesting/portfolio management dashboard demo
 
 - **Data Analysis & Optimization**
   - CVXPY (Convex Optimization)
-  - Scikit-learn (Machine Learning)
   - Statsmodels (Statistical Analysis)
 
 - **Visualization**
@@ -82,6 +88,7 @@ pip install -r requirements.txt
 
 1. Start the dashboard:
 ```bash
+$env:PYTHONPATH = "The_Project_Folder_Path"
 streamlit run .\src\visualizations\back_test_dashboard.py
 
 ```
